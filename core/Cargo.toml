@@ -1,0 +1,24 @@
+[package]
+name = "verder-helpen-core"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+josekit = "0.8.4"
+log = "0.4.20"
+reqwest = { version = "0.11.22", features = ["json"] }
+rocket = { version = "0.5.0", features = ["json"] }
+serde = { version = "1.0.193", features = ["derive"] }
+serde_json = "1.0.108"
+
+verder-helpen-jwt.path = "../verder-helpen-jwt"
+verder-helpen-proto.path = "../verder-helpen-proto"
+
+[dev-dependencies]
+figment = { version = "0.10.12", features = ["env", "toml", "json"] }
+httpmock = "0.6.8"
+tokio-test = "0.4.3"
+
+verder-helpen-comm-common = { path = "../comm-common", features = [
+    "auth_during_comm",
+] }

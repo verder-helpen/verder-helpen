@@ -1,0 +1,14 @@
+[package]
+name = "verder-helpen-jwt"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+josekit.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
+
+verder-helpen-proto.path = "../verder-helpen-proto"
+
+[dev-dependencies]
+serde_yaml.workspace = true
