@@ -1,0 +1,36 @@
+[package]
+name = "verder-helpen-comm-common"
+edition.workspace = true
+rust-version.workspace = true
+
+[features]
+default = ["auth_during_comm", "platform_token", "session_db"]
+auth_during_comm = ["platform_token"]
+platform_token = []
+session_db = ["platform_token"]
+
+[dependencies]
+accept-language.workspace = true
+josekit.workspace = true
+lazy_static.workspace = true
+rand.workspace = true
+reqwest = { workspace = true, features = ["json"] }
+rocket = { workspace = true, features = ["json"] }
+rocket_oauth2.workspace = true
+rocket_sync_db_pools = { workspace = true, features = ["postgres_pool"] }
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+strum.workspace = true
+strum_macros.workspace = true
+tera.workspace = true
+thiserror.workspace = true
+unic-langid.workspace = true
+
+verder-helpen-jwt.path = "../verder-helpen-jwt"
+verder-helpen-proto.path = "../verder-helpen-proto"
+
+[dev-dependencies]
+figment = { workspace = true, features = ["env", "toml", "json"] }
+serial_test.workspace = true
+tokio-test.workspace = true

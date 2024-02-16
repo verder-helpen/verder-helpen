@@ -1,0 +1,9 @@
+[package]
+name = "test-jwt"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+josekit.workspace = true
+
+verder-helpen-jwt.path = "../../verder-helpen-jwt"

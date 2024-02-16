@@ -1,0 +1,8 @@
+[package]
+name = "verder-helpen-proto"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+rocket.workspace = true
+serde = { workspace = true, features = ["derive"] }

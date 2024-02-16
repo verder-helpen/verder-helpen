@@ -1,0 +1,17 @@
+[package]
+name = "verder-helpen-auth-test"
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+askama.workspace = true
+base64.workspace = true
+josekit.workspace = true
+reqwest = { workspace = true, features = ["json"] }
+rocket = { workspace = true, features = ["json"] }
+serde.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+
+verder-helpen-jwt.path = "../verder-helpen-jwt"
+verder-helpen-proto.path = "../verder-helpen-proto"

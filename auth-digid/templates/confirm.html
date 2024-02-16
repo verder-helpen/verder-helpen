@@ -1,0 +1,42 @@
+{{ define "confirm" }}
+<!doctype html>
+<html lang="nl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ translate .language "messages.confirm_title" }}</title>
+    <link rel="stylesheet" media="all" href="/assets/style.css" />
+  </head>
+  <body>
+    <main>
+      <p>{{ translate .language "messages.confirm_intro" }}</p>
+      <section>
+        <dl>
+          {{ range $key, $value := .attributes }}
+            <dt>{{ $key }}</dt>
+            <dd>{{ $value }}</dd>
+          {{ end }}
+        </dl>
+      </section>
+      <div class="options">
+        <form method="post">
+          {{ .csrfField }}
+          <button type="submit" class="button primary">
+            <span class="text">{{ translate .language "messages.confirm" }}</span>
+          </button>
+        </form>
+        <form action="{{ .logoutPath }}" method="post">
+          {{ .csrfField }}
+          <button type="submit" class="button">
+            <span class="text">{{ translate .language "messages.logout" }}</span>
+          </button>
+        </form>
+      </div>
+    </main>
+    <footer>
+      <span class="text">beveiligd door</span>
+      <span class="logo"></span>
+    </footer>
+  </body>
+</html>
+{{ end }}
