@@ -294,8 +294,8 @@ core_url = "https://core.example.com"
 widget_url = "https://widget.example.com"
 display_name = "Example Comm"
 auth_provider = "Google"
-guest_signature_secret = "fliepfliepfliepfliepfliepfliepfliepfliep"
-host_signature_secret = "flapflapflapflapflapflapflapflapflapflap"
+guest_signature_secret = "9e4ed6fdc6f7b8fb78f500d3abf3a042412140703249e2fe5671ecdab7e694bb"
+host_signature_secret = "54f0a09305eaa1d3ffc3ccb6035e95871eecbfa964404332ffddad52d43bf7b1"
 start_auth_key_id = "example"
 
 [global.translations.en]

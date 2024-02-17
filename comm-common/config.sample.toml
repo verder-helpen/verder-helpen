@@ -10,7 +10,7 @@ core_url = "http://core:8000"
 default_locale = "en"
 display_name = "Videobellen"
 
-start_auth_key_id = "comm-common"
+start_auth_key_id = "common"
 
 guest_signature_secret = "9e4ed6fdc6f7b8fb78f500d3abf3a042412140703249e2fe5671ecdab7e694bb"
 host_signature_secret = "54f0a09305eaa1d3ffc3ccb6035e95871eecbfa964404332ffddad52d43bf7b1"

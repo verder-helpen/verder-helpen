@@ -60,7 +60,6 @@ start = "http://auth-irma:8000"
 tag = "digid"
 name = "DigiD"
 image_path = "/static/digid.svg"
-shim_tel_url = true
 start = "http://auth-test:8000"
 
 [[global.comm_methods]]
