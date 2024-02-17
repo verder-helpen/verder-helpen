@@ -86,10 +86,7 @@ pub fn render(
 
     let mut context = Context::new();
 
-    let sorted_credentials: Vec<Sorted> = credentials
-        .into_iter()
-        .map(Sorted::from)
-        .collect();
+    let sorted_credentials: Vec<Sorted> = credentials.into_iter().map(Sorted::from).collect();
 
     context.insert("translations", translations.all());
     context.insert("credentials", &sorted_credentials);
@@ -255,9 +252,7 @@ mod tests {
         };
 
         let credentials = collect_credentials(&guest_auth_results, &config).unwrap();
-        let actual =
-            render(&config, credentials, RenderType::Html, &translations)
-                .unwrap();
+        let actual = render(&config, credentials, RenderType::Html, &translations).unwrap();
         let expected: &str =
             "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta \
              name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Verder \
@@ -278,9 +273,7 @@ mod tests {
         );
 
         let credentials = collect_credentials(&guest_auth_results, &config).unwrap();
-        let rendered =
-            render(&config, credentials, RenderType::Json, &translations)
-                .unwrap();
+        let rendered = render(&config, credentials, RenderType::Json, &translations).unwrap();
         let result: serde_json::Value = serde_json::from_str(rendered.content()).unwrap();
         let expected = serde_json::json! {
             [{

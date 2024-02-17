@@ -50,10 +50,7 @@ fn init(guest_token: &str, config: &State<Config>) -> Result<Redirect, Error> {
         purpose,
         redirect_url,
         ..
-    } = GuestToken::from_platform_jwt(
-        guest_token,
-        config.auth_during_comm().guest_verifier(),
-    )?;
+    } = GuestToken::from_platform_jwt(guest_token, config.auth_during_comm().guest_verifier())?;
 
     let auth_select_params = AuthSelectParams {
         purpose,
@@ -83,10 +80,8 @@ async fn start(
     db: SessionDBConn,
     queue: &State<Sender<AttributesUpdateEvent>>,
 ) -> Result<Json<ClientUrlResponse>, Error> {
-    let guest_token = GuestToken::from_platform_jwt(
-        guest_token,
-        config.auth_during_comm().guest_verifier(),
-    )?;
+    let guest_token =
+        GuestToken::from_platform_jwt(guest_token, config.auth_during_comm().guest_verifier())?;
     let StartRequest {
         purpose,
         auth_method,
@@ -123,10 +118,7 @@ async fn start(
 
     let client = reqwest::Client::new();
     let client_url_response = client
-        .post(format!(
-            "{}/start",
-            config.auth_during_comm().core_url()
-        ))
+        .post(format!("{}/start", config.auth_during_comm().core_url()))
         .header(
             reqwest::header::ACCEPT,
             reqwest::header::HeaderValue::from_static("application/json"),
@@ -267,13 +259,9 @@ async fn attribute_ui(
                 .await
                 .unwrap_or_else(|_| Vec::new());
 
-            return Ok(credentials::render(
-                config,
-                credentials,
-                RenderType::Html,
-                &translations,
-            )
-            .unwrap());
+            return Ok(
+                credentials::render(config, credentials, RenderType::Html, &translations).unwrap(),
+            );
         }
 
         return Err(Error::BadRequest("invalid host token".to_owned()));

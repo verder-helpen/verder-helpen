@@ -249,13 +249,9 @@ fn user_inline(
         &auth_result
     );
     if continuation.contains('?') {
-        Ok(Redirect::to(format!(
-            "{continuation}&result={auth_result}"
-        )))
+        Ok(Redirect::to(format!("{continuation}&result={auth_result}")))
     } else {
-        Ok(Redirect::to(format!(
-            "{continuation}?result={auth_result}"
-        )))
+        Ok(Redirect::to(format!("{continuation}?result={auth_result}")))
     }
 }
 

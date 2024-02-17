@@ -229,10 +229,7 @@ async fn redirect_generic<T>(
 }
 
 #[rocket::post("/auth/logout")]
-fn logout_generic(
-    cookies: &CookieJar<'_>,
-    translations: Translations,
-) -> Result<String, Error> {
+fn logout_generic(cookies: &CookieJar<'_>, translations: Translations) -> Result<String, Error> {
     cookies.remove_private(Cookie::from("token"));
 
     Ok(translations.get(
