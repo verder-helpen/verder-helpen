@@ -28,7 +28,7 @@ pub mod prelude {
     #[cfg(feature = "session_db")]
     pub use crate::credentials::get_credentials_for_host;
     #[cfg(feature = "platform_token")]
-    pub use crate::credentials::{collect_credentials, render_credentials};
+    pub use crate::credentials::{collect_credentials, render};
     #[cfg(feature = "session_db")]
     pub use crate::session::{Session, SessionDBConn};
     #[cfg(feature = "platform_token")]

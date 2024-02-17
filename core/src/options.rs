@@ -71,13 +71,13 @@ pub fn all_session_options(config: &State<CoreConfig>) -> Result<Json<AllSession
 
 #[get("/session_options/<purpose>")]
 pub fn session_options(
-    purpose: String,
+    purpose: &str,
     config: &State<CoreConfig>,
 ) -> Result<Json<SessionOptions>, Error> {
     let purpose = config
         .purposes
-        .get(&purpose)
-        .ok_or_else(|| Error::NoSuchPurpose(purpose.clone()))?;
+        .get(purpose)
+        .ok_or_else(|| Error::NoSuchPurpose(purpose.to_owned()))?;
     let auth_methods = MethodProperties::filter_methods_by_tags(
         purpose.allowed_auth.iter(),
         &config.auth_methods,

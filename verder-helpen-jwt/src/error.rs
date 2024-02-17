@@ -38,7 +38,7 @@ impl StdError for Error {
         match self {
             Error::Json(e) => Some(e),
             Error::JWT(e) => Some(e),
-            _ => None,
+            Error::InvalidStructure => None,
         }
     }
 }

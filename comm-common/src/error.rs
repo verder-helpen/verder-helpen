@@ -15,7 +15,7 @@ pub enum Error {
     #[error("Not found")]
     NotFound,
     #[error("Bad Request: {0}")]
-    BadRequest(&'static str),
+    BadRequest(String),
     #[error("Forbidden: {0}")]
     Forbidden(String),
     #[error("Unauthorized: {0}")]
@@ -38,15 +38,14 @@ pub enum Error {
 
 impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for Error {
     fn respond_to(self, request: &'r rocket::Request<'_>) -> rocket::response::Result<'o> {
-        use Error::*;
         let (message, status) = match &self {
-            NotFound => ("Not found".to_string(), Status::NotFound),
-            BadRequest(m) => (m.to_string(), Status::BadRequest),
-            Forbidden(m) => (m.to_string(), Status::Forbidden),
-            Unauthorized(m) => (m.to_string(), Status::Unauthorized),
-            InternalServer(m) => (m.to_string(), Status::InternalServerError),
-            Jwe(m) => (m.to_string(), Status::BadRequest),
-            Template(m) => (m.to_string(), Status::InternalServerError),
+            Error::NotFound => ("Not found".to_string(), Status::NotFound),
+            Error::BadRequest(m) => (m.to_string(), Status::BadRequest),
+            Error::Forbidden(m) => (m.to_string(), Status::Forbidden),
+            Error::Unauthorized(m) => (m.to_string(), Status::Unauthorized),
+            Error::InternalServer(m) => (m.to_string(), Status::InternalServerError),
+            Error::Jwe(m) => (m.to_string(), Status::BadRequest),
+            Error::Template(m) => (m.to_string(), Status::InternalServerError),
             _ => return rocket::response::Debug::from(self).respond_to(request),
         };
 

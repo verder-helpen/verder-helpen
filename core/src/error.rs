@@ -34,12 +34,12 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for Error {
         match self {
             Error::NoSuchMethod(m) => {
                 let bad_request = rocket::response::status::BadRequest::<Option<()>>(None);
-                log::error!("Unknown method {}", m);
+                log::error!("Unknown method {m}");
                 bad_request.respond_to(request)
             }
             Error::NoSuchPurpose(m) => {
                 let bad_request = rocket::response::status::BadRequest::<Option<()>>(None);
-                log::error!("Unknown purpose {}", m);
+                log::error!("Unknown purpose {m}");
                 bad_request.respond_to(request)
             }
             Error::BadRequest => {
@@ -57,8 +57,8 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Error::NoSuchMethod(m) => f.write_fmt(format_args!("No such method: {}", m)),
-            Error::NoSuchPurpose(m) => f.write_fmt(format_args!("No such purpose: {}", m)),
+            Error::NoSuchMethod(m) => f.write_fmt(format_args!("No such method: {m}")),
+            Error::NoSuchPurpose(m) => f.write_fmt(format_args!("No such purpose: {m}")),
             Error::Reqwest(e) => e.fmt(f),
             Error::Jwt(e) => e.fmt(f),
             Error::Json(e) => e.fmt(f),

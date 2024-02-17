@@ -43,7 +43,7 @@ pub fn sign_start_auth_request(
 
 /// Serialize and sign a set of AuthSelectParams for use in the auth-select menu
 pub fn sign_auth_select_params(
-    params: AuthSelectParams,
+    params: &AuthSelectParams,
     signer: &dyn JwsSigner,
 ) -> Result<String, JwtError> {
     let mut sig_header = JwsHeader::new();
@@ -174,7 +174,7 @@ mod tests {
         .unwrap();
 
         let result = sign_auth_select_params(
-            AuthSelectParams {
+            &AuthSelectParams {
                 purpose: "test".into(),
                 start_url: "https://example.com".into(),
                 cancel_url: "https://example.com/cancel".into(),

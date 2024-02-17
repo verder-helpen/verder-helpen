@@ -112,7 +112,7 @@ struct SessionUpdateData {
 }
 
 #[get("/confirm/<attributes>/<continuation>/<attr_url>")]
-async fn confirm_oob(
+fn confirm_oob(
     config: &State<config::Config>,
     attributes: String,
     continuation: String,
@@ -137,7 +137,7 @@ async fn confirm_oob(
 }
 
 #[get("/confirm/<attributes>/<continuation>")]
-async fn confirm_ib(
+fn confirm_ib(
     config: &State<config::Config>,
     attributes: String,
     continuation: String,
@@ -160,7 +160,7 @@ async fn confirm_ib(
 }
 
 #[post("/session/update?<typedata..>")]
-async fn session_update(typedata: SessionUpdateData) -> Result<(), Error> {
+fn session_update(typedata: SessionUpdateData) -> Result<(), Error> {
     println!("Session update received: {:?}", typedata.typeval);
     Ok(())
 }
@@ -202,26 +202,26 @@ async fn user_oob(
         .await;
     if let Err(e) = result {
         // Log only
-        println!("Failure reporting results: {}", e);
+        println!("Failure reporting results: {e}");
     } else {
-        println!("Reported result jwe {} to {}", &auth_result, attr_url);
+        println!("Reported result jwe {} to {attr_url}", &auth_result);
     }
 
-    println!("Redirecting user to {}", continuation);
+    println!("Redirecting user to {continuation}");
     Ok(Redirect::to(continuation.to_string()))
 }
 
 #[get("/cancel/browser/<continuation>")]
-async fn cancel_oob(continuation: String) -> Result<Redirect, Error> {
+fn cancel_oob(continuation: String) -> Result<Redirect, Error> {
     let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
     let continuation = std::str::from_utf8(&continuation)?;
 
-    println!("Redirecting user to {}", continuation);
+    println!("Redirecting user to {continuation}");
     Ok(Redirect::to(continuation.to_string()))
 }
 
 #[get("/browser/<attributes>/<continuation>")]
-async fn user_inline(
+fn user_inline(
     config: &State<config::Config>,
     attributes: String,
     continuation: String,
@@ -245,24 +245,22 @@ async fn user_inline(
     let continuation = std::str::from_utf8(&continuation)?;
 
     println!(
-        "Redirecting user to {} with auth result {}",
-        continuation, &auth_result
+        "Redirecting user to {continuation} with auth result {}",
+        &auth_result
     );
     if continuation.contains('?') {
         Ok(Redirect::to(format!(
-            "{}&result={}",
-            continuation, auth_result
+            "{continuation}&result={auth_result}"
         )))
     } else {
         Ok(Redirect::to(format!(
-            "{}?result={}",
-            continuation, auth_result
+            "{continuation}?result={auth_result}"
         )))
     }
 }
 
 #[post("/start_authentication", data = "<request>")]
-async fn start_authentication(
+fn start_authentication(
     config: &State<config::Config>,
     request: Json<StartAuthRequest>,
 ) -> Result<Json<StartAuthResponse>, Error> {
@@ -314,7 +312,7 @@ fn rocket() -> _ {
     let config = base
         .figment()
         .extract::<Config>()
-        .unwrap_or_else(|e| panic!("Failure to parse configuration: {:?}", e));
+        .unwrap_or_else(|e| panic!("Failure to parse configuration: {e:?}"));
 
     base.manage(config)
 }

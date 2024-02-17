@@ -61,7 +61,7 @@ impl Session {
 
         res.map_err(|e| {
             if let Some(&postgres::error::SqlState::UNIQUE_VIOLATION) = e.code() {
-                Error::BadRequest("A session with that ID already exists")
+                Error::BadRequest("A session with that ID already exists".to_owned())
             } else {
                 Error::from(e)
             }

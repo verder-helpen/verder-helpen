@@ -75,21 +75,21 @@ fn ui() -> &'static str {
 }
 
 #[get("/ui?<result>")]
-fn ui_withparams(result: String, config: &State<Config>) -> Result<&'static str, Error> {
+fn ui_withparams(result: &str, config: &State<Config>) -> Result<&'static str, Error> {
     println!("Received inline authentication results {:?}", &result);
 
     let session_result =
-        decrypt_and_verify_auth_result(&result, config.verifier(), config.decrypter())?;
+        decrypt_and_verify_auth_result(result, config.verifier(), config.decrypter())?;
     println!("Decoded: {session_result:?}");
 
     Ok(ui())
 }
 
 #[post("/auth_result", data = "<auth_result>")]
-fn attr_url(auth_result: String, config: &State<Config>) -> Result<(), Error> {
+fn attr_url(auth_result: &str, config: &State<Config>) -> Result<(), Error> {
     println!("Received authentication result {:?}", &auth_result);
     let auth_result =
-        decrypt_and_verify_auth_result(&auth_result, config.verifier(), config.decrypter())?;
+        decrypt_and_verify_auth_result(auth_result, config.verifier(), config.decrypter())?;
     println!("Decoded: {auth_result:?}");
 
     Ok(())
@@ -126,7 +126,7 @@ fn rocket() -> _ {
     let config = base
         .figment()
         .extract::<Config>()
-        .unwrap_or_else(|e| panic!("Failure to parse configuration: {:?}", e));
+        .unwrap_or_else(|e| panic!("Failure to parse configuration: {e:?}"));
 
     base.manage(config)
 }

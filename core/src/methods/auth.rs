@@ -29,7 +29,7 @@ impl AuthenticationMethod {
         attr_url: &Option<String>,
         config: &CoreConfig,
     ) -> Result<String, Error> {
-        let continuation = self.parse_continuation(continuation, config)?;
+        let continuation = Self::parse_continuation(continuation, config)?;
         if let Some(attr_url) = attr_url {
             if self.disable_attr_url {
                 return self
@@ -69,7 +69,7 @@ impl AuthenticationMethod {
         let mut state = HashMap::new();
         state.insert("attr_url".to_string(), attr_url.to_string());
         state.insert("continuation".to_string(), continuation.to_string());
-        let state = config.encode_urlstate(state)?;
+        let state = config.encode_urlstate(&state)?;
 
         // Start auth session
         let client = reqwest::Client::builder()
@@ -90,7 +90,7 @@ impl AuthenticationMethod {
             .client_url)
     }
 
-    fn parse_continuation(&self, continuation: &str, config: &CoreConfig) -> Result<String, Error> {
+    fn parse_continuation(continuation: &str, config: &CoreConfig) -> Result<String, Error> {
         Ok(if continuation.starts_with("tel:") {
             sign_continuation(continuation, config)?
         } else {

@@ -105,7 +105,7 @@ impl From<RawCoreConfig> for CoreConfig {
                 .into_iter()
                 .map(|(requestor, key)| {
                     let key = Box::<dyn JwsVerifier>::try_from(key).unwrap_or_else(|_| {
-                        log::error!("Could not parse requestor key for requestor {}", requestor);
+                        log::error!("Could not parse requestor key for requestor {requestor}");
                         panic!("Invalid requestor key")
                     });
                     (requestor, key)
@@ -114,19 +114,19 @@ impl From<RawCoreConfig> for CoreConfig {
             internal_signer: Hs256
                 .signer_from_bytes(config.internal_secret.0.as_bytes())
                 .unwrap_or_else(|e| {
-                    log::error!("Could not generate signer from internal secret: {}", e);
-                    panic!("Could not generate signer from internal secret: {}", e)
+                    log::error!("Could not generate signer from internal secret: {e}");
+                    panic!("Could not generate signer from internal secret: {e}")
                 }),
             internal_verifier: Hs256
                 .verifier_from_bytes(config.internal_secret.0.as_bytes())
                 .unwrap_or_else(|e| {
-                    log::error!("Could not generate verifier from internal secret: {}", e);
-                    panic!("Could not generate verifier from internal secret: {}", e)
+                    log::error!("Could not generate verifier from internal secret: {e}");
+                    panic!("Could not generate verifier from internal secret: {e}")
                 }),
             ui_signer: config.ui_signing_privkey.map(|ui_signing_privkey| {
                 Box::<dyn JwsSigner>::try_from(ui_signing_privkey).unwrap_or_else(|e| {
-                    log::error!("Could not generate signer from core private key: {}", e);
-                    panic!("Could not generate signer from core private key: {}", e)
+                    log::error!("Could not generate signer from core private key: {e}");
+                    panic!("Could not generate signer from core private key: {e}")
                 })
             }),
             server_url: config.server_url,
@@ -135,10 +135,18 @@ impl From<RawCoreConfig> for CoreConfig {
         // Handle wildcards in purpose auth and comm method lists
         for purpose in config.purposes.values_mut() {
             if contains_wildcard(&purpose.allowed_auth) {
-                purpose.allowed_auth = config.auth_methods.keys().map(|x| x.to_string()).collect();
+                purpose.allowed_auth = config
+                    .auth_methods
+                    .keys()
+                    .map(ToString::to_string)
+                    .collect();
             }
             if contains_wildcard(&purpose.allowed_comm) {
-                purpose.allowed_comm = config.comm_methods.keys().map(|x| x.to_string()).collect();
+                purpose.allowed_comm = config
+                    .comm_methods
+                    .keys()
+                    .map(ToString::to_string)
+                    .collect();
             }
         }
 
@@ -191,14 +199,14 @@ impl CoreConfig {
             .ok_or_else(|| Error::NoSuchMethod(auth_method.to_string()))
     }
 
-    pub fn encode_urlstate(&self, state: HashMap<String, String>) -> Result<String, Error> {
+    pub fn encode_urlstate(&self, state: &HashMap<String, String>) -> Result<String, Error> {
         let mut payload = JwtPayload::new();
 
         payload.set_issued_at(&std::time::SystemTime::now());
         payload.set_expires_at(
             &(std::time::SystemTime::now() + std::time::Duration::from_secs(30 * 60)),
         );
-        for (k, v) in state.iter() {
+        for (k, v) in state {
             payload.set_claim(k, Some(serde_json::to_value(v)?))?;
         }
 
@@ -217,7 +225,7 @@ impl CoreConfig {
         validator.validate(&payload)?;
 
         let mut result = HashMap::new();
-        for (k, v) in payload.claims_set().iter() {
+        for (k, v) in payload.claims_set() {
             if k == "exp" || k == "iat" {
                 continue;
             }
@@ -235,7 +243,7 @@ impl CoreConfig {
             Ok(header
                 .key_id()
                 .and_then(|kid| self.authonly_request_keys.get(kid))
-                .map(|key| key.as_ref()))
+                .map(AsRef::as_ref))
         })?
         .0;
         let mut validator = JwtPayloadValidator::new();
@@ -252,7 +260,7 @@ impl CoreConfig {
     }
 
     pub fn ui_signer(&self) -> Option<&dyn JwsSigner> {
-        self.ui_signer.as_ref().map(|v| v.as_ref())
+        self.ui_signer.as_ref().map(AsRef::as_ref)
     }
 }
 
@@ -690,7 +698,7 @@ allowed_comm = [ "call" ]
         test_map.insert("key_1".to_string(), "value_1".to_string());
         test_map.insert("key_2".to_string(), "value_2".to_string());
 
-        let encoded = config.encode_urlstate(test_map.clone()).unwrap();
+        let encoded = config.encode_urlstate(&test_map).unwrap();
         assert_eq!(config.decode_urlstate(encoded).unwrap(), test_map);
 
         const EXPIRED_JWT: &str = "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE2MTYwNjAzODEsImV4cCI6MTYxNjA2MjE4MSwia2V5XzEiOiJ2YWx1ZV8xIiwia2V5XzIiOiJ2YWx1ZV8yIn0.S8YcM93jDJswxGxvmIE763KhabUqODUFX1qr7NFBh30";

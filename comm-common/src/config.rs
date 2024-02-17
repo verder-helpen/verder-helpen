@@ -33,7 +33,7 @@ pub struct RawConfig {
     #[cfg(feature = "auth_during_comm")]
     #[serde(flatten)]
     /// Configuration specific for auth during comm
-    auth_during_comm_config: RawAuthDuringCommConfig,
+    auth_during_comm: RawAuthDuringCommConfig,
 
     custom_css: Option<String>,
 }
@@ -55,7 +55,7 @@ pub struct Config {
 
     #[cfg(feature = "auth_during_comm")]
     #[serde(flatten)]
-    pub auth_during_comm_config: AuthDuringCommConfig,
+    pub auth_during_comm: AuthDuringCommConfig,
 
     pub custom_css: Option<String>,
 }
@@ -66,8 +66,7 @@ impl TryFrom<RawConfig> for Config {
 
     fn try_from(raw_config: RawConfig) -> Result<Config, Error> {
         #[cfg(feature = "auth_during_comm")]
-        let auth_during_comm_config =
-            AuthDuringCommConfig::try_from(raw_config.auth_during_comm_config)?;
+        let auth_during_comm = AuthDuringCommConfig::try_from(raw_config.auth_during_comm)?;
 
         let auth_provider = match raw_config.auth_provider {
             Some(a) => Some(auth::AuthProvider::try_from(a)?),
@@ -76,7 +75,7 @@ impl TryFrom<RawConfig> for Config {
 
         Ok(Config {
             #[cfg(feature = "auth_during_comm")]
-            auth_during_comm_config,
+            auth_during_comm,
             internal_url: raw_config.internal_url,
             external_guest_url: raw_config.external_guest_url,
             external_host_url: raw_config.external_host_url,
@@ -126,8 +125,8 @@ impl Config {
     }
 
     #[cfg(feature = "auth_during_comm")]
-    pub fn auth_during_comm_config(&self) -> &AuthDuringCommConfig {
-        &self.auth_during_comm_config
+    pub fn auth_during_comm(&self) -> &AuthDuringCommConfig {
+        &self.auth_during_comm
     }
 }
 
@@ -371,18 +370,15 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZLquEijJ7cP7K9qIHG7EvCTph53N
         #[cfg(feature = "auth_during_comm")]
         {
             assert_eq!(
-                config.auth_during_comm_config().core_url(),
+                config.auth_during_comm().core_url(),
                 "https://core.example.com"
             );
-            assert_eq!(
-                config.auth_during_comm_config().display_name(),
-                "Example Comm"
-            );
+            assert_eq!(config.auth_during_comm().display_name(), "Example Comm");
 
             let message: [u8; 3] = [42, 42, 42];
 
             let auth_during_comm_signature = config
-                .auth_during_comm_config()
+                .auth_during_comm()
                 .start_auth_signer()
                 .sign(&message)
                 .unwrap();
@@ -393,7 +389,7 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZLquEijJ7cP7K9qIHG7EvCTph53N
                 .is_ok());
 
             let widget_signing_signature = config
-                .auth_during_comm_config()
+                .auth_during_comm()
                 .widget_signer()
                 .sign(&message)
                 .unwrap();

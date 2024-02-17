@@ -45,30 +45,30 @@ struct AttributesUpdateEvent {
 }
 
 #[get("/init/<guest_token>")]
-async fn init(guest_token: &str, config: &State<Config>) -> Result<Redirect, Error> {
+fn init(guest_token: &str, config: &State<Config>) -> Result<Redirect, Error> {
     let GuestToken {
         purpose,
         redirect_url,
         ..
     } = GuestToken::from_platform_jwt(
         guest_token,
-        config.auth_during_comm_config().guest_verifier(),
+        config.auth_during_comm().guest_verifier(),
     )?;
 
     let auth_select_params = AuthSelectParams {
         purpose,
         start_url: format!("{}/start/{}", config.external_guest_url(), guest_token),
         cancel_url: redirect_url,
-        display_name: config.auth_during_comm_config().display_name().to_owned(),
+        display_name: config.auth_during_comm().display_name().to_owned(),
     };
 
     let auth_select_params = jwt::sign_auth_select_params(
-        auth_select_params,
-        config.auth_during_comm_config().widget_signer(),
+        &auth_select_params,
+        config.auth_during_comm().widget_signer(),
     )?;
     let uri = format!(
         "{}{}",
-        config.auth_during_comm_config().widget_url(),
+        config.auth_during_comm().widget_url(),
         auth_select_params
     );
 
@@ -85,7 +85,7 @@ async fn start(
 ) -> Result<Json<ClientUrlResponse>, Error> {
     let guest_token = GuestToken::from_platform_jwt(
         guest_token,
-        config.auth_during_comm_config().guest_verifier(),
+        config.auth_during_comm().guest_verifier(),
     )?;
     let StartRequest {
         purpose,
@@ -94,7 +94,7 @@ async fn start(
 
     if purpose != guest_token.purpose {
         return Err(Error::BadRequest(
-            "Purpose from start request does not match guest token purpose.",
+            "Purpose from start request does not match guest token purpose.".to_owned(),
         ));
     }
 
@@ -117,15 +117,15 @@ async fn start(
 
     let start_request = jwt::sign_start_auth_request(
         start_request,
-        config.auth_during_comm_config().start_auth_key_id(),
-        config.auth_during_comm_config().start_auth_signer(),
+        config.auth_during_comm().start_auth_key_id(),
+        config.auth_during_comm().start_auth_signer(),
     )?;
 
     let client = reqwest::Client::new();
     let client_url_response = client
         .post(format!(
             "{}/start",
-            config.auth_during_comm_config().core_url()
+            config.auth_during_comm().core_url()
         ))
         .header(
             reqwest::header::ACCEPT,
@@ -190,7 +190,7 @@ impl<'r> rocket::request::FromRequest<'r> for MyRocket<'r> {
 }
 
 #[get("/live/<token>")]
-async fn session_info<'a>(
+fn session_info<'a>(
     queue: &State<Sender<AttributesUpdateEvent>>,
     mut end: Shutdown,
     token: &'a str,
@@ -204,7 +204,7 @@ async fn session_info<'a>(
         if authorized.into() {
             let host_token = HostToken::from_platform_jwt(
                 token,
-                config.auth_during_comm_config().host_verifier(),
+                config.auth_during_comm().host_verifier(),
             );
 
             if let Ok(host_token) = host_token {
@@ -214,10 +214,7 @@ async fn session_info<'a>(
                     select! {
                         msg = rx.recv() => match msg {
                             Ok(msg) => {
-                                let db = match SessionDBConn::get_one(rocket.0).await {
-                                    Some(db) => db,
-                                    None => break,
-                                };
+                                let Some(db) = SessionDBConn::get_one(rocket.0).await else { break };
 
                                 // fetch all attribute ids related to the provided host token
                                 if let Ok(sessions) = Session::find_by_room_id(
@@ -237,7 +234,7 @@ async fn session_info<'a>(
                             Err(RecvError::Closed) => break,
                             Err(RecvError::Lagged(_)) => continue,
                         },
-                        _ = &mut end => break,
+                        () = &mut end => break,
                     };
                 }
             }
@@ -263,35 +260,35 @@ async fn attribute_ui(
 ) -> Result<RenderedContent, Error> {
     if authorized.into() {
         let host_token =
-            HostToken::from_platform_jwt(token, config.auth_during_comm_config().host_verifier());
+            HostToken::from_platform_jwt(token, config.auth_during_comm().host_verifier());
 
         if let Ok(token) = host_token {
             let credentials = credentials::get_credentials_for_host(token, config, &db)
                 .await
                 .unwrap_or_else(|_| Vec::new());
 
-            return Ok(credentials::render_credentials(
+            return Ok(credentials::render(
                 config,
                 credentials,
                 RenderType::Html,
-                translations,
+                &translations,
             )
             .unwrap());
         }
 
-        return Err(Error::BadRequest("invalid host token"));
+        return Err(Error::BadRequest("invalid host token".to_owned()));
     }
 
     auth::render_login(config, RenderType::Html, translations)
 }
 
 #[get("/attribute.css")]
-async fn attribute_css() -> RawCss<&'static str> {
+fn attribute_css() -> RawCss<&'static str> {
     RawCss(include_str!("templates/attribute.css"))
 }
 
 #[get("/attribute.js")]
-async fn attribute_js() -> RawJavaScript<&'static str> {
+fn attribute_js() -> RawJavaScript<&'static str> {
     RawJavaScript(include_str!("templates/attribute.js"))
 }
 
