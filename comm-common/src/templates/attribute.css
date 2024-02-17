@@ -10,6 +10,17 @@
   --border-radius: 0.2rem;
 }
 
+/* remove button style  */
+button, input[type="submit"], input[type="reset"] {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  outline: inherit;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -40,10 +51,10 @@ a {
   color: var(--primary-color);
 }
 
-.status {
+.container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
   height: 100%;
 }
 
@@ -141,4 +152,52 @@ a {
 .notification.error {
   background-color: #ffcbcb;
   border: 1px solid #fc7676;
+}
+
+.button {
+  font-size: 0.9rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: var(--dark);
+  background-color: white;
+  text-decoration: none;
+  width: 250px;
+}
+
+.button > .text {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  border-radius: var(--border-radius);
+  background-color: none;
+  border: 1px solid var(--dark-grey);
+  color: var(--dark);
+  height: 50px;
+  transition: all 100ms;
+}
+
+.button > .icon {
+  aspect-ratio: 1;
+  width: 50px;
+  border-radius: var(--border-radius);
+  background-position: center;
+  background-size: contain;
+  background-repeat: no-repeat;
+}
+
+.button.login > .icon {
+  background-image: url('/assets/digid.svg');
+}
+
+.button.logout > .icon {
+  background-image: url('/assets/digid.svg');
+}
+
+.button.primary > .text {
+  border-color: rgb(var(--primary-color));
+  color: rgb(var(--primary-color));
+}
+
+.button:hover > .text {
+  background-color: rgba(var(--primary-color), 0.02);
 }

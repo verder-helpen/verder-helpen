@@ -45,13 +45,13 @@ struct AttributesUpdateEvent {
 }
 
 #[get("/init/<guest_token>")]
-async fn init(guest_token: String, config: &State<Config>) -> Result<Redirect, Error> {
+async fn init(guest_token: &str, config: &State<Config>) -> Result<Redirect, Error> {
     let GuestToken {
         purpose,
         redirect_url,
         ..
     } = GuestToken::from_platform_jwt(
-        &guest_token,
+        guest_token,
         config.auth_during_comm_config().guest_verifier(),
     )?;
 
@@ -77,20 +77,20 @@ async fn init(guest_token: String, config: &State<Config>) -> Result<Redirect, E
 
 #[post("/start/<guest_token>", data = "<start_request>")]
 async fn start(
-    guest_token: String,
-    start_request: String,
+    guest_token: &str,
+    start_request: &str,
     config: &State<Config>,
     db: SessionDBConn,
     queue: &State<Sender<AttributesUpdateEvent>>,
 ) -> Result<Json<ClientUrlResponse>, Error> {
     let guest_token = GuestToken::from_platform_jwt(
-        &guest_token,
+        guest_token,
         config.auth_during_comm_config().guest_verifier(),
     )?;
     let StartRequest {
         purpose,
         auth_method,
-    } = serde_json::from_str(&start_request)?;
+    } = serde_json::from_str(start_request)?;
 
     if purpose != guest_token.purpose {
         return Err(Error::BadRequest(
@@ -154,21 +154,24 @@ async fn start(
 
 #[post("/auth_result/<attr_id>", data = "<auth_result>")]
 async fn auth_result(
-    attr_id: String,
-    auth_result: String,
+    attr_id: &str,
+    auth_result: &str,
     config: &State<Config>,
     db: SessionDBConn,
     queue: &State<Sender<AttributesUpdateEvent>>,
 ) -> Result<(), Error> {
     verder_helpen_jwt::decrypt_and_verify_auth_result(
-        &auth_result,
+        auth_result,
         config.verifier(),
         config.decrypter(),
     )?;
-    let response = Session::register_auth_result(attr_id.clone(), auth_result, &db).await;
+    let response =
+        Session::register_auth_result(attr_id.to_owned(), auth_result.to_owned(), &db).await;
 
     // may fail when there are no subscribers
-    let _ = queue.send(AttributesUpdateEvent { attr_id });
+    let _ = queue.send(AttributesUpdateEvent {
+        attr_id: attr_id.to_owned(),
+    });
 
     response
 }
@@ -190,7 +193,7 @@ impl<'r> rocket::request::FromRequest<'r> for MyRocket<'r> {
 async fn session_info<'a>(
     queue: &State<Sender<AttributesUpdateEvent>>,
     mut end: Shutdown,
-    token: String,
+    token: &'a str,
     config: &'a State<Config>,
     authorized: Authorized,
     rocket: MyRocket<'a>,
@@ -200,7 +203,7 @@ async fn session_info<'a>(
     EventStream! {
         if authorized.into() {
             let host_token = HostToken::from_platform_jwt(
-                &token,
+                token,
                 config.auth_during_comm_config().host_verifier(),
             );
 
@@ -256,11 +259,11 @@ async fn attribute_ui(
     db: SessionDBConn,
     authorized: Authorized,
     translations: Translations,
-    token: String,
+    token: &str,
 ) -> Result<RenderedContent, Error> {
     if authorized.into() {
         let host_token =
-            HostToken::from_platform_jwt(&token, config.auth_during_comm_config().host_verifier());
+            HostToken::from_platform_jwt(token, config.auth_during_comm_config().host_verifier());
 
         if let Ok(token) = host_token {
             let credentials = credentials::get_credentials_for_host(token, config, &db)

@@ -1,10 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div>
-  <p class="notification">{{ translations.login_necessary }}</p>
-  <p>
-    <a target="_blank" rel="noopener noreferer" class="button primary" href="{{ login_url }}">{{ translations.login }}</a>
-  </p>
+<div class="container">
+  <div class="notification">
+    <p>{{ translations.login_necessary }}</p>
+  </div>
+
+  <a target="_blank" rel="noopener noreferer" class="button primary" href="{{ login_url }}">
+    <span class="text">{{ translations.login }}</span>
+  </a>
+  {% include "footer.html" %}
 </div>
 {% endblock content %}

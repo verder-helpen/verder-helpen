@@ -35,7 +35,7 @@ Configure the applicable domains and credentials in:
 
 - `config.sample.toml`
 
-You will need a webserver (like NGINX) to serve static files and perform the necessary routing. 
+You will need a webserver (like NGINX) to serve static files and perform the necessary routing.
 
 ## Further reading
 
