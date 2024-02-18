@@ -3582,7 +3582,7 @@ checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "verder-helpen-auth-test"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "askama",
  "base64 0.13.1",
@@ -3598,7 +3598,7 @@ dependencies = [
 
 [[package]]
 name = "verder-helpen-comm-common"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "accept-language",
  "figment",
@@ -3625,7 +3625,7 @@ dependencies = [
 
 [[package]]
 name = "verder-helpen-comm-test"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "josekit",
  "rocket",
@@ -3638,7 +3638,7 @@ dependencies = [
 
 [[package]]
 name = "verder-helpen-core"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "figment",
  "httpmock",
@@ -3656,7 +3656,7 @@ dependencies = [
 
 [[package]]
 name = "verder-helpen-jwt"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "josekit",
  "serde",
@@ -3667,7 +3667,7 @@ dependencies = [
 
 [[package]]
 name = "verder-helpen-proto"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "rocket",
  "serde",

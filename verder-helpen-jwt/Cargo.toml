@@ -1,5 +1,6 @@
 [package]
 name = "verder-helpen-jwt"
+version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 

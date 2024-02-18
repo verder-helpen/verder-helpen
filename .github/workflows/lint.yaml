@@ -1,0 +1,79 @@
+name: Build, run tests and lint
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          rustup toolchain install nightly
+          rustup default nightly
+          rustup component add rustfmt
+      - run: cargo fmt --all -- --check
+
+  outdated:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: cargo outdated --exit-code 1
+
+  deny:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - run: |
+        cargo install cargo-deny || true
+    - run: cargo deny --log-level warn --all-features check advisories
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: cargo
+          shared-key: build
+      - run: cargo build --all-features --all-targets --release --verbose
+
+  clippy:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - uses: Swatinem/rust-cache@v2
+          with:
+            prefix-key: cargo
+            shared-key: check
+        - run: cargo clippy --all-features --all-targets --tests -- -Dwarnings -Aclippy::blocks-in-conditions
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: cargo
+          shared-key: test
+      - run: cargo test --all-features --all-targets --verbose
+
+  udeps:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Swatinem/rust-cache@v2
+        with:
+          prefix-key: cargo
+          shared-key: udeps
+      - run: |
+          cargo install cargo-udeps || true
+          rustup toolchain install nightly
+          rustup default nightly
+      - run: cargo udeps --all-features --all-targets
