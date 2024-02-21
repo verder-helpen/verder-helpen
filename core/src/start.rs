@@ -67,7 +67,7 @@ pub async fn session_start(
     config: &State<CoreConfig>,
 ) -> Result<ClientUrlResponse, Error> {
     // Workaround for issue where matching routes based on json body structure does
-    // not works as expected
+    // not work as expected
     if let Ok(start_request) = serde_json::from_str::<StartRequestFull>(&choices) {
         session_start_full(start_request, config).await
     } else if let Ok(c) = serde_json::from_str::<StartRequestCommOnly>(&choices) {
@@ -153,8 +153,6 @@ async fn start_session_comm_only(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
-
     use figment::{
         providers::{Format, Toml},
         Figment,

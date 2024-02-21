@@ -1,4 +1,4 @@
-use std::{collections::HashMap, convert::TryFrom, error::Error as StdError, fmt::Display};
+use std::{collections::HashMap, error::Error as StdError, fmt::Display};
 
 use josekit::{jwe::JweEncrypter, jws::JwsSigner};
 use serde::Deserialize;

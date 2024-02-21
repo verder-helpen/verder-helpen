@@ -136,7 +136,7 @@ pub async fn get_credentials_for_host(
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::HashMap, convert::TryFrom};
+    use std::collections::HashMap;
 
     use josekit::{
         jwe::{JweDecrypter, JweEncrypter},

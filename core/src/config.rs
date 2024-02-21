@@ -1,4 +1,4 @@
-use std::{collections::HashMap, convert::TryFrom, fmt::Debug};
+use std::{collections::HashMap, fmt::Debug};
 
 use josekit::{
     jws::{

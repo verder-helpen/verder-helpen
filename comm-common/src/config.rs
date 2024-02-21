@@ -1,4 +1,4 @@
-use std::{collections::HashMap, convert::TryFrom};
+use std::collections::HashMap;
 
 use josekit::{jwe::JweDecrypter, jws::JwsVerifier};
 use serde::Deserialize;
@@ -132,7 +132,7 @@ impl Config {
 
 #[cfg(feature = "auth_during_comm")]
 mod auth_during_comm {
-    use std::{convert::TryFrom, fmt::Debug};
+    use std::fmt::Debug;
 
     use josekit::jws::{alg::hmac::HmacJwsAlgorithm, JwsSigner, JwsVerifier};
     use serde::Deserialize;

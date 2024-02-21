@@ -1,4 +1,4 @@
-use std::{convert::TryFrom, error::Error as StdError, fmt::Display};
+use std::{error::Error as StdError, fmt::Display};
 
 use josekit::{jwe::JweDecrypter, jws::JwsVerifier};
 use serde::Deserialize;

@@ -73,8 +73,6 @@ pub fn sign_auth_select_params(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
-
     use josekit::{
         jws::{JwsSigner, JwsVerifier},
         jwt::JwtPayloadValidator,

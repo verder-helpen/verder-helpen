@@ -1,4 +1,4 @@
-use std::{convert::TryFrom, fmt::Debug};
+use std::fmt::Debug;
 
 use josekit::{
     jwe::{JweDecrypter, JweEncrypter, ECDH_ES, RSA_OAEP},

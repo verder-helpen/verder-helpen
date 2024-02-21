@@ -1,5 +1,5 @@
 use core::convert::Infallible;
-use std::{convert::TryFrom, str::FromStr};
+use std::str::FromStr;
 
 use reqwest::header::AUTHORIZATION;
 use rocket::{
