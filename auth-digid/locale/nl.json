@@ -7,6 +7,7 @@
     "confirm": "Bevestigen",
     "logout": "Uitloggen",
     "confirm_title": "Bevestig gegevens",
-    "confirm_intro": "De volgende gegevens worden doorgegeven aan het service center"
+    "confirm_intro": "De volgende gegevens worden doorgegeven aan het service center",
+    "secured_by": "beveiligd door"
   }
 }

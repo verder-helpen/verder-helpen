@@ -1,4 +1,4 @@
-# Isolated communication plugin for Verder Helpen
+# Common communication plugin for Verder Helpen
 
 This repository is a part of the Verder Helpen Platform. It contains a communication plugin useable for
 communication platforms that only want to display a users attribute to helpdesk employees. This is
@@ -18,11 +18,13 @@ The plugin is written in [Rust](https://www.rust-lang.org/).
 ## Getting started
 
 To build and run this plugin backend run:
+
 ```
 ROCKET_CONFIG=config.sample.toml cargo run
 ```
 
 The attribute UI can be built by:
+
 ```
 cd attribute-ui
 yarn

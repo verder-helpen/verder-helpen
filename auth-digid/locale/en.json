@@ -7,6 +7,7 @@
     "confirm": "Confirm",
     "logout": "Logout",
     "confirm_title": "Confirm details",
-    "confirm_intro": "The following details will be shown to the service center"
+    "confirm_intro": "The following details will be shown to the service center",
+    "secured_by": "secured by"
   }
 }
