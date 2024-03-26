@@ -211,7 +211,7 @@ async fn user_oob(
     Ok(Redirect::to(continuation.to_string()))
 }
 
-#[get("/cancel/browser/<continuation>")]
+#[post("/cancel/browser/<continuation>")]
 fn cancel_oob(continuation: String) -> Result<Redirect, Error> {
     let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
     let continuation = std::str::from_utf8(&continuation)?;
