@@ -58,7 +58,7 @@ TQIDAQAB
 	jwt, err := buildAttributeJWT(map[string]string{"a": "b"}, "https://example.com", sig_privkey, enc_pubkey)
 	require.NoError(t, err)
 
-	testJwtCommand := exec.Command("test-jwt/target/debug/test-jwt")
+	testJwtCommand := exec.Command("../target/debug/test-jwt")
 	stdin, err := testJwtCommand.StdinPipe()
 	require.NoError(t, err)
 	go func() {

@@ -19,8 +19,8 @@ Some tests depend on a postgres database, to run these, add the flags `-ldflags 
 
 For a quick setup using Docker, the following commands can be used:
 ```bash
-docker run -e POSTGRES_PASSWORD=password -p 127.0.0.1:5432:5432 --rm postgres
-go test -ldflags "-X github.com/verder-helpen/auth-digid.testdb=postgres://postgres:password@127.0.0.1:5432/postgres"
+docker run -e POSTGRES_PASSWORD=postgres -p 127.0.0.1:5432:5432 --rm postgres
+go test -ldflags "-X github.com/verder-helpen/auth-digid.testdb=postgres://postgres:postgres@127.0.0.1:5432/postgres"
 ```
 
 ## Development
