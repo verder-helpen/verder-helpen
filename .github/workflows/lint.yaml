@@ -56,6 +56,20 @@ jobs:
 
   test-rust:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      TEST_DB: postgres://postgres:postgres@localhost:5432/postgres
     steps:
       - uses: actions/checkout@v3
       - uses: Swatinem/rust-cache@v2
@@ -95,7 +109,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - working-directory: auth-digid
-        run: go test -v ./... -ldflags "-X github.com/verder-helpen/auth-digid.testdb=postgres://postgres:postgres@localhost:5432/postgres"
+        run: go test -v ./... -ldflags "-X github.com/verder-helpen/verder-helpen/auth-digid.testdb=postgres://postgres:postgres@localhost:5432/postgres"
 
   format-go:
     runs-on: ubuntu-latest
