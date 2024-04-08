@@ -3066,6 +3066,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "test-jwt"
+version = "0.1.0"
+dependencies = [
+ "josekit",
+ "verder-helpen-jwt",
+]
+
+[[package]]
 name = "thiserror"
 version = "1.0.58"
 source = "registry+https://github.com/rust-lang/crates.io-index"

@@ -6,6 +6,9 @@ members = [
     "core",
     "verder-helpen-proto",
     "verder-helpen-jwt",
+
+    # for testing only
+    "auth-digid/test-jwt",
 ]
 resolver = "2"
 
