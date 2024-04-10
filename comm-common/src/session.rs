@@ -211,7 +211,7 @@ pub async fn clean_db(db: &SessionDBConn) -> Result<(), Error> {
 }
 
 pub async fn periodic_cleanup(db: &SessionDBConn, period: Option<u64>) -> Result<(), Error> {
-    let duration = Duration::from_secs(period.unwrap_or(5) * 60);
+    let duration = Duration::from_secs(period.unwrap_or(1) * 30);
     let mut interval = tokio::time::interval(duration);
 
     loop {
