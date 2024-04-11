@@ -154,13 +154,26 @@ impl Session {
     pub async fn find_by_room_id(room_id: String, db: &SessionDBConn) -> Result<Vec<Self>, Error> {
         let sessions = db
             .run(move |c| -> Result<Vec<Session>, Error> {
+                // let rows = c.query(
+                //     "
+                //     UPDATE session
+                //     SET last_activity = now()
+                //     WHERE room_id = $1
+                //     RETURNING
+                //         session_id,
+                //         room_id,
+                //         redirect_url,
+                //         purpose,
+                //         name,
+                //         attr_id,
+                //         auth_result,
+                //         created_ad
+                //     ",
+                //     &[&room_id],
+                // )?;
                 let rows = c.query(
                     "
-                    UPDATE session
-                    SET last_activity = now()
-                    WHERE room_id = $1
-                    RETURNING
-                        session_id,
+                    SELECT session_id,
                         room_id,
                         redirect_url,
                         purpose,
@@ -168,6 +181,8 @@ impl Session {
                         attr_id,
                         auth_result,
                         created_at
+                    FROM session
+                    WHERE room_id = $1
                     ",
                     &[&room_id],
                 )?;
