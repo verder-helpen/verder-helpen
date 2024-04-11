@@ -217,7 +217,7 @@ impl Session {
 pub async fn clean_db(db: &SessionDBConn) -> Result<(), Error> {
     db.run(move |c| {
         c.execute(
-            "DELETE FROM session WHERE last_activity < now() - INTERVAL '1 minute'",
+            "DELETE FROM session WHERE last_activity < now() - INTERVAL '2 minute'",
             &[],
         )
     })
