@@ -107,19 +107,18 @@ struct ConfirmTemplate {
 
 #[derive(FromForm, Debug)]
 struct SessionUpdateData {
-    #[field(name = "type")]
-    typeval: SessionActivity,
+    r#type: SessionActivity,
 }
 
 #[get("/confirm/<attributes>/<continuation>/<attr_url>")]
 fn confirm_oob(
     config: &State<config::Config>,
-    attributes: String,
-    continuation: String,
-    attr_url: String,
+    attributes: &str,
+    continuation: &str,
+    attr_url: &str,
 ) -> Result<RawHtml<String>, Error> {
     let values = config.map_attributes(&serde_json::from_slice::<Vec<String>>(
-        &base64::decode_config(attributes.clone(), URL_SAFE_NO_PAD)?,
+        &base64::decode_config(attributes, URL_SAFE_NO_PAD)?,
     )?)?;
     let template = ConfirmTemplate {
         dologin: format!(
@@ -129,7 +128,12 @@ fn confirm_oob(
             continuation,
             attr_url
         ),
-        dologout: format!("{}/cancel/browser/{}", config.server_url(), continuation),
+        dologout: format!(
+            "{}/cancel/{}/{}",
+            config.server_url(),
+            continuation,
+            attr_url
+        ),
         attributes: values,
     };
     let output = template.render()?;
@@ -137,13 +141,13 @@ fn confirm_oob(
 }
 
 #[get("/confirm/<attributes>/<continuation>")]
-fn confirm_ib(
+fn confirm_inline(
     config: &State<config::Config>,
-    attributes: String,
-    continuation: String,
+    attributes: &str,
+    continuation: &str,
 ) -> Result<RawHtml<String>, Error> {
     let values = config.map_attributes(&serde_json::from_slice::<Vec<String>>(
-        &base64::decode_config(attributes.clone(), URL_SAFE_NO_PAD)?,
+        &base64::decode_config(attributes, URL_SAFE_NO_PAD)?,
     )?)?;
     let template = ConfirmTemplate {
         dologin: format!(
@@ -152,7 +156,7 @@ fn confirm_ib(
             attributes,
             continuation
         ),
-        dologout: format!("{}/cancel/browser/{}", config.server_url(), continuation),
+        dologout: format!("{}/cancel/{}", config.server_url(), continuation),
         attributes: values,
     };
     let output = template.render()?;
@@ -161,37 +165,20 @@ fn confirm_ib(
 
 #[post("/session/update?<typedata..>")]
 fn session_update(typedata: SessionUpdateData) -> Result<(), Error> {
-    println!("Session update received: {:?}", typedata.typeval);
+    println!("Session update received: {:?}", typedata.r#type);
     Ok(())
 }
 
-#[get("/browser/<attributes>/<continuation>/<attr_url>")]
-async fn user_oob(
+async fn post_result(
+    auth_result: AuthResult,
     config: &State<config::Config>,
-    attributes: String,
-    continuation: String,
-    attr_url: String,
-) -> Result<Redirect, Error> {
-    let attributes = base64::decode_config(attributes, URL_SAFE_NO_PAD)?;
-    let attributes: Vec<String> = serde_json::from_slice(&attributes)?;
-    let attributes = config.map_attributes(&attributes)?;
-    let auth_result = AuthResult {
-        status: AuthStatus::Success,
-        attributes: Some(attributes),
-        session_url: if config.with_session() {
-            Some(format!("{}/session/update", config.internal_url()))
-        } else {
-            None
-        },
-    };
-    let auth_result =
-        sign_and_encrypt_auth_result(&auth_result, config.signer(), config.encrypter())?;
-
-    let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
-    let continuation = std::str::from_utf8(&continuation)?;
-
+    attr_url: &str,
+) -> Result<(), Error> {
     let attr_url = base64::decode_config(attr_url, URL_SAFE_NO_PAD)?;
     let attr_url = std::str::from_utf8(&attr_url)?;
+
+    let auth_result =
+        sign_and_encrypt_auth_result(&auth_result, config.signer(), config.encrypter())?;
 
     let client = reqwest::Client::new();
     let result = client
@@ -206,25 +193,23 @@ async fn user_oob(
     } else {
         println!("Reported result jwe {} to {attr_url}", &auth_result);
     }
-
-    println!("Redirecting user to {continuation}");
-    Ok(Redirect::to(continuation.to_string()))
+    Ok(())
 }
 
-#[post("/cancel/browser/<continuation>")]
-fn cancel_oob(continuation: String) -> Result<Redirect, Error> {
-    let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
-    let continuation = std::str::from_utf8(&continuation)?;
-
-    println!("Redirecting user to {continuation}");
-    Ok(Redirect::to(continuation.to_string()))
+fn session_url(config: &config::Config) -> Option<String> {
+    if config.with_session() {
+        Some(format!("{}/session/update", config.internal_url()))
+    } else {
+        None
+    }
 }
 
-#[get("/browser/<attributes>/<continuation>")]
-fn user_inline(
+#[post("/browser/<attributes>/<continuation>/<attr_url>")]
+async fn user_oob(
     config: &State<config::Config>,
-    attributes: String,
-    continuation: String,
+    attributes: &str,
+    continuation: &str,
+    attr_url: &str,
 ) -> Result<Redirect, Error> {
     let attributes = base64::decode_config(attributes, URL_SAFE_NO_PAD)?;
     let attributes: Vec<String> = serde_json::from_slice(&attributes)?;
@@ -232,15 +217,46 @@ fn user_inline(
     let auth_result = AuthResult {
         status: AuthStatus::Success,
         attributes: Some(attributes),
-        session_url: if config.with_session() {
-            Some(format!("{}/session/update", config.internal_url()))
-        } else {
-            None
-        },
+        session_url: session_url(config),
     };
+
+    let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
+    let continuation = std::str::from_utf8(&continuation)?;
+
+    post_result(auth_result, config, attr_url).await?;
+
+    println!("Redirecting user to {continuation}");
+    Ok(Redirect::to(continuation.to_string()))
+}
+
+#[post("/cancel/<continuation>/<attr_url>")]
+async fn cancel_oob(
+    config: &State<config::Config>,
+    continuation: &str,
+    attr_url: &str,
+) -> Result<Redirect, Error> {
+    let auth_result = AuthResult {
+        status: AuthStatus::Failed,
+        attributes: Some(HashMap::new()),
+        session_url: session_url(config),
+    };
+
+    let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
+    let continuation = std::str::from_utf8(&continuation)?;
+
+    post_result(auth_result, config, attr_url).await?;
+
+    println!("Redirecting user to {continuation}");
+    Ok(Redirect::to(continuation.to_string()))
+}
+
+fn redirect_user(
+    auth_result: AuthResult,
+    config: &State<config::Config>,
+    continuation: &str,
+) -> Result<Redirect, Error> {
     let auth_result =
         sign_and_encrypt_auth_result(&auth_result, config.signer(), config.encrypter())?;
-
     let continuation = base64::decode_config(continuation, URL_SAFE_NO_PAD)?;
     let continuation = std::str::from_utf8(&continuation)?;
 
@@ -253,6 +269,35 @@ fn user_inline(
     } else {
         Ok(Redirect::to(format!("{continuation}?result={auth_result}")))
     }
+}
+
+#[post("/browser/<attributes>/<continuation>")]
+fn user_inline(
+    config: &State<config::Config>,
+    attributes: &str,
+    continuation: &str,
+) -> Result<Redirect, Error> {
+    let attributes = base64::decode_config(attributes, URL_SAFE_NO_PAD)?;
+    let attributes: Vec<String> = serde_json::from_slice(&attributes)?;
+    let attributes = config.map_attributes(&attributes)?;
+    let auth_result = AuthResult {
+        status: AuthStatus::Success,
+        attributes: Some(attributes),
+        session_url: session_url(config),
+    };
+
+    redirect_user(auth_result, config, continuation)
+}
+
+#[post("/cancel/<continuation>")]
+fn cancel_inline(config: &State<config::Config>, continuation: &str) -> Result<Redirect, Error> {
+    let auth_result = AuthResult {
+        status: AuthStatus::Failed,
+        attributes: Some(HashMap::new()),
+        session_url: session_url(config),
+    };
+
+    redirect_user(auth_result, config, continuation)
 }
 
 #[post("/start_authentication", data = "<request>")]
@@ -296,7 +341,8 @@ fn rocket() -> _ {
         "/",
         routes![
             cancel_oob,
-            confirm_ib,
+            cancel_inline,
+            confirm_inline,
             confirm_oob,
             session_update,
             start_authentication,

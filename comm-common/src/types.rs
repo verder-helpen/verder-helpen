@@ -1,6 +1,7 @@
 use core::str;
 use std::collections::HashMap;
 
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -27,6 +28,7 @@ pub struct GuestAuthResult {
     pub purpose: Option<String>,
     pub name: Option<String>,
     pub auth_result: Option<String>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[derive(Serialize, Debug)]
@@ -34,6 +36,7 @@ pub struct Credentials {
     pub purpose: Option<String>,
     pub name: Option<String>,
     pub attributes: Option<HashMap<String, String>>,
+    pub created_at: DateTime<Utc>,
 }
 
 #[cfg(feature = "platform_token")]

@@ -1,5 +1,6 @@
 use std::time::Duration;
 
+use chrono::{DateTime, Utc};
 use rocket::tokio;
 use rocket_sync_db_pools::{database, postgres};
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,8 @@ pub struct Session {
     pub auth_result: Option<String>,
     /// ID used to match incoming attributes with this session
     pub attr_id: String,
+    /// The date and time the session was created
+    pub created_at: DateTime<Utc>,
 }
 
 impl Session {
@@ -26,6 +29,7 @@ impl Session {
             attr_id,
             guest_token,
             auth_result: None,
+            created_at: Utc::now(),
         }
     }
 
@@ -37,15 +41,16 @@ impl Session {
             .run(move |c| {
                 c.execute(
                     "INSERT INTO session (
-                session_id,
-                room_id,
-                redirect_url,
-                purpose,
-                name,
-                attr_id,
-                auth_result,
-                last_activity
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, now());",
+                        session_id,
+                        room_id,
+                        redirect_url,
+                        purpose,
+                        name,
+                        attr_id,
+                        auth_result,
+                        created_at,
+                        last_activity
+                    ) VALUES ($1, $2, $3, $4, $5, $6, $7, now(), now());",
                     &[
                         &this.guest_token.id,
                         &this.guest_token.room_id,
@@ -76,8 +81,8 @@ impl Session {
             .run(move |c| {
                 c.execute(
                     "UPDATE session
-                SET last_activity = now()
-                WHERE session_id = $1",
+                    SET last_activity = now()
+                    WHERE session_id = $1",
                     &[&this.guest_token.id],
                 )
             })
@@ -99,12 +104,12 @@ impl Session {
             .run(move |c| {
                 c.execute(
                     "UPDATE session SET attr_id=$1 WHERE
-                session_id = $2 AND
-                room_id = $3 AND
-                redirect_url = $4 AND
-                purpose = $5 AND
-                name = $6 AND
-                auth_result IS NULL",
+                        session_id = $2 AND
+                        room_id = $3 AND
+                        redirect_url = $4 AND
+                        purpose = $5 AND
+                        name = $6 AND
+                        auth_result IS NULL",
                     &[
                         &new_attr_id,
                         &token.id,
@@ -161,7 +166,8 @@ impl Session {
                         purpose,
                         name,
                         attr_id,
-                        auth_result
+                        auth_result,
+                        created_at
                     ",
                     &[&room_id],
                 )?;
@@ -181,6 +187,7 @@ impl Session {
                             guest_token,
                             attr_id: r.get("attr_id"),
                             auth_result: r.get("auth_result"),
+                            created_at: r.get("created_at"),
                         })
                     })
                     .collect()
@@ -195,7 +202,8 @@ impl Session {
 pub async fn clean_db(db: &SessionDBConn) -> Result<(), Error> {
     db.run(move |c| {
         c.execute(
-            "DELETE FROM session WHERE last_activity < now() - INTERVAL '1 hour'",
+            "DELETE FROM session WHERE created_at < now() - INTERVAL '2 hour' OR last_activity < \
+             now() - INTERVAL '15 minute'",
             &[],
         )
     })
@@ -215,6 +223,7 @@ pub async fn periodic_cleanup(db: &SessionDBConn, period: Option<u64>) -> Result
 
 #[cfg(test)]
 mod tests {
+    use chrono::Utc;
     use figment::{
         providers::{Format, Toml},
         Figment,
@@ -276,6 +285,7 @@ session = {{ url = "{}" }}
             guest_token,
             auth_result: None,
             attr_id: random_string(32),
+            created_at: Utc::now(),
         }
     }
 
@@ -290,9 +300,10 @@ session = {{ url = "{}" }}
                 name,
                 attr_id,
                 auth_result,
+                created_at,
                 last_activity
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, now() - INTERVAL '{}');",
-                age
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, now() - INTERVAL '{}', now() - INTERVAL '{}');",
+                age, age
             );
 
             c.execute(

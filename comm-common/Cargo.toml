@@ -12,8 +12,10 @@ session_db = ["platform_token"]
 
 [dependencies]
 accept-language.workspace = true
+chrono = { workspace = true, features = ["serde"] }
 josekit.workspace = true
 lazy_static.workspace = true
+postgres = { workspace = true, features = ["with-chrono-0_4"] }
 rand.workspace = true
 reqwest = { workspace = true, features = ["json"] }
 rocket = { workspace = true, features = ["json"] }
