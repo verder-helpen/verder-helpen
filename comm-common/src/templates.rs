@@ -38,6 +38,10 @@ pub enum RenderType {
     Html,
 }
 
+pub fn is_some(value: Option<&tera::Value>, _args: &[tera::Value]) -> tera::Result<bool> {
+    Ok(value.map_or(false, |x| !x.is_null()))
+}
+
 // Includes template at runtime, if available, otherwise uses compile-time
 // template. This enables the option to override the templates per comm-plugin,
 // but also to simply use the default template.
@@ -69,6 +73,8 @@ macro_rules! include_template {
 lazy_static! {
     pub static ref TEMPLATES: Tera = {
         let mut tera = Tera::default();
+
+        tera.register_tester("some", is_some);
 
         include_template!(tera, "macros.html");
         include_template!(tera, "attribute.js");

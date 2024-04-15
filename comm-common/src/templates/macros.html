@@ -35,12 +35,12 @@
 </div>
 {% endmacro %}
 
-{% macro guest_cancelled(credential) %}
+{% macro guest_not_shared(credential) %}
 <div class="notification error">
   {%- if credential.name -%}
-  <p>{{ credential.name }} {{ translations.guest_cancelled }}</p>
+  <p>{{ credential.name }} {{ translations.guest_not_shared }}</p>
   {%- else -%}
-  <p>{{ translations.guest_cancelled_anonymous }}</p>
+  <p>{{ translations.guest_not_shared_anonymous }}</p>
   {%- endif -%}
 </div>
 {% endmacro %}

@@ -9,6 +9,7 @@ CREATE TABLE "session" (
     "name" text NOT NULL,
     "attr_id" text NOT NULL,
     "auth_result" text,
+    "created_at" timestamptz NOT NULL,
     "last_activity" timestamp NOT NULL,
     PRIMARY KEY ("id")
 );

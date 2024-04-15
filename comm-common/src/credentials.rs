@@ -36,8 +36,11 @@ pub fn collect_credentials(
             name: guest_auth_result.name.clone(),
             purpose: guest_auth_result.purpose.clone(),
             attributes,
+            created_at: guest_auth_result.created_at,
         });
     }
+
+    credentials.sort_by(|x, y| x.created_at.cmp(&y.created_at));
 
     Ok(credentials)
 }
@@ -126,11 +129,10 @@ pub async fn get_credentials_for_host(
             purpose: Some(session.guest_token.purpose),
             name: Some(session.guest_token.name),
             auth_result: session.auth_result,
+            created_at: session.created_at,
         })
         .collect::<Vec<GuestAuthResult>>();
-    println!("{:?}", &guest_auth_results);
     let creds = collect_credentials(&guest_auth_results, config);
-    println!("{:?}", &creds);
     creds
 }
 

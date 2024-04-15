@@ -48,5 +48,4 @@ Bs6neR/sZuHzNm8y/xtxj2ZAEw==
 
     let result =
         verder_helpen_jwt::decrypt_and_verify_auth_result(&jwt, &sig_pubkey, &enc_privkey).unwrap();
-    println!("{:?}", result);
 }

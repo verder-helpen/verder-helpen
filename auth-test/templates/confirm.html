@@ -1,43 +1,43 @@
 <!doctype html>
 <html lang="nl">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bevestig gegevens</title>
-    <link rel="stylesheet" media="all" href="/assets/style.css" />
-    <link rel="stylesheet" media="all" href="/assets/custom.css" />
-  </head>
-  <body>
-    <main>
-      <p>Geef je gegevens door via de knop 'bevestigen'.</p>
-      <section>
-        {% if attributes.len() != 0 %}
-        <dl>
-          {%- for attr in attributes %}
-            <dt><span>{{ attr.0 }}</span></dt>
-            <dd><span>{{ attr.1 }}</span></dd>
-          {%- endfor %}
-        </dl>
-        {% else %}
-        <p><i>Foutmelding: Geen gegevens gevonden</i></p>
-        {% endif %}
-      </section>
-      <div class="options">
-        <form action="{{ dologin }}" method="get">
-          <button type="submit" class="button primary">
-            <span class="text">Bevestigen</span>
-          </button>
-        </form>
-        <form action="{{ dologout }}" method="post">
-          <button type="submit" class="button">
-            <span class="text">Uitloggen</span>
-          </button>
-        </form>
-      </div>
-    </main>
-    <footer>
-      <span class="text">beveiligd door</span>
-      <span class="logo"></span>
-    </footer>
-  </body>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Bevestig gegevens</title>
+        <link rel="stylesheet" media="all" href="/assets/style.css" />
+        <link rel="stylesheet" media="all" href="/assets/custom.css" />
+    </head>
+    <body>
+        <main>
+            <p>Geef je gegevens door via de knop 'bevestigen'.</p>
+            <section>
+                {% if attributes.len() != 0 %}
+                <dl>
+                    {%- for attr in attributes %}
+                    <dt><span>{{ attr.0 }}</span></dt>
+                    <dd><span>{{ attr.1 }}</span></dd>
+                    {%- endfor %}
+                </dl>
+                {% else %}
+                <p><i>Foutmelding: Geen gegevens gevonden</i></p>
+                {% endif %}
+            </section>
+            <div class="options">
+                <form action="{{ dologin }}" method="post">
+                    <button type="submit" class="button primary">
+                        <span class="text">Bevestigen</span>
+                    </button>
+                </form>
+                <form action="{{ dologout }}" method="post">
+                    <button type="submit" class="button">
+                        <span class="text">Uitloggen</span>
+                    </button>
+                </form>
+            </div>
+        </main>
+        <footer>
+            <span class="text">beveiligd door</span>
+            <span class="logo"></span>
+        </footer>
+    </body>
 </html>
