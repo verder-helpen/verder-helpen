@@ -2,13 +2,13 @@ use std::{error::Error as StdError, fmt::Display};
 
 use josekit::{jwe::JweDecrypter, jws::JwsVerifier};
 use serde::Deserialize;
-use verder_helpen_jwt::{EncryptionKeyConfig, SignKeyConfig};
+use verder_helpen_common::{BaseUrl, EncryptionKeyConfig, SignKeyConfig};
 
 #[derive(Debug)]
 pub enum Error {
     Yaml(serde_yaml::Error),
     Json(serde_json::Error),
-    Jwt(verder_helpen_jwt::Error),
+    Jwt(verder_helpen_common::Error),
 }
 
 impl From<serde_yaml::Error> for Error {
@@ -23,8 +23,8 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-impl From<verder_helpen_jwt::Error> for Error {
-    fn from(e: verder_helpen_jwt::Error) -> Error {
+impl From<verder_helpen_common::Error> for Error {
+    fn from(e: verder_helpen_common::Error) -> Error {
         Error::Jwt(e)
     }
 }
@@ -49,15 +49,15 @@ impl StdError for Error {
     }
 }
 
-fn default_as_true() -> bool {
+fn r#true() -> bool {
     true
 }
 
 #[derive(Deserialize, Debug)]
 struct RawConfig {
-    server_url: String,
-    internal_url: String,
-    #[serde(default = "default_as_true")]
+    server_url: BaseUrl,
+    internal_url: BaseUrl,
+    #[serde(default = "r#true")]
     use_attr_url: bool,
     decryption_privkey: EncryptionKeyConfig,
     signature_pubkey: SignKeyConfig,
@@ -66,8 +66,8 @@ struct RawConfig {
 #[derive(Debug, Deserialize)]
 #[serde(try_from = "RawConfig")]
 pub struct Config {
-    server_url: String,
-    internal_url: String,
+    server_url: BaseUrl,
+    internal_url: BaseUrl,
     use_attr_url: bool,
     decrypter: Box<dyn JweDecrypter>,
     verifier: Box<dyn JwsVerifier>,
@@ -89,11 +89,11 @@ impl TryFrom<RawConfig> for Config {
 }
 
 impl Config {
-    pub fn server_url(&self) -> &str {
+    pub fn server_url(&self) -> &BaseUrl {
         &self.server_url
     }
 
-    pub fn internal_url(&self) -> &str {
+    pub fn internal_url(&self) -> &BaseUrl {
         &self.internal_url
     }
 

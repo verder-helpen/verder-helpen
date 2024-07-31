@@ -3,17 +3,16 @@ use std::{collections::HashMap, fmt::Debug};
 use josekit::{
     jws::{
         alg::hmac::{HmacJwsAlgorithm::Hs256, HmacJwsSigner, HmacJwsVerifier},
-        JwsHeader, JwsSigner, JwsVerifier,
+        JwsHeader, JwsVerifier,
     },
     jwt::{self, decode_with_verifier_selector, JwtPayload, JwtPayloadValidator},
 };
 use serde::Deserialize;
-use verder_helpen_jwt::SignKeyConfig;
+use verder_helpen_common::{BaseUrl, SignKeyConfig, StartRequestAuthOnly};
 
 use crate::{
     error::Error,
     methods::{AuthenticationMethod, CommunicationMethod, Method},
-    start::StartRequestAuthOnly,
 };
 
 #[derive(Debug, Deserialize, Clone)]
@@ -47,8 +46,7 @@ struct RawCoreConfig {
     purposes: Vec<Purpose>,
     authonly_request_keys: HashMap<String, SignKeyConfig>,
     internal_secret: TokenSecret,
-    server_url: String,
-    ui_signing_privkey: Option<SignKeyConfig>,
+    server_url: BaseUrl,
 }
 
 #[derive(Debug, Deserialize)]
@@ -60,8 +58,7 @@ pub struct CoreConfig {
     authonly_request_keys: HashMap<String, Box<dyn JwsVerifier>>,
     internal_signer: HmacJwsSigner,
     internal_verifier: HmacJwsVerifier,
-    server_url: String,
-    ui_signer: Option<Box<dyn JwsSigner>>,
+    server_url: BaseUrl,
 }
 
 fn contains_wildcard(target: &[String]) -> bool {
@@ -123,12 +120,6 @@ impl From<RawCoreConfig> for CoreConfig {
                     log::error!("Could not generate verifier from internal secret: {e}");
                     panic!("Could not generate verifier from internal secret: {e}")
                 }),
-            ui_signer: config.ui_signing_privkey.map(|ui_signing_privkey| {
-                Box::<dyn JwsSigner>::try_from(ui_signing_privkey).unwrap_or_else(|e| {
-                    log::error!("Could not generate signer from core private key: {e}");
-                    panic!("Could not generate signer from core private key: {e}")
-                })
-            }),
             server_url: config.server_url,
         };
 
@@ -255,12 +246,8 @@ impl CoreConfig {
         )?)
     }
 
-    pub fn server_url(&self) -> &str {
+    pub fn server_url(&self) -> &BaseUrl {
         &self.server_url
-    }
-
-    pub fn ui_signer(&self) -> Option<&dyn JwsSigner> {
-        self.ui_signer.as_ref().map(AsRef::as_ref)
     }
 }
 
@@ -281,39 +268,6 @@ server_url = "https://core.verderhelpen.nl"
 internal_url = "http://core:8000"
 internal_secret = "sample_secret_1234567890178901237890"
 
-[global.ui_signing_privkey]
-type = "RSA"
-key = """
------BEGIN PRIVATE KEY-----
-MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDn/BGtPZPgYa+5
-BhxaMuv+UV7nWxNXYUt3cYBoyIc3xD9VP9cSE/+RnrTjaXUGPZWlnbIzG/b3gkrA
-EIg1zfjxUth34N+QycnjJf0tkcrZaR7q0JYEH2ZiAaMzAI11dzNuX3rHX8d69pOi
-u+T3WvMK/PDq9XTyO2msDI3lpgxTgjT9xUnCLTduH+yStoAHXXSZBKqLVBT/bPoe
-S5/v7/H9sALG+JYLI8J3/CRc2kWFNxGV8V7IpzLSnAXHU4sIMnWpjuhT7PXBzKl4
-4d6JRLGuJIeVZpPbiR74nvwYZWacJl278xG66fmG+BqJbGeEgGYTEljq9G4yXCRt
-Go5+3lBNAgMBAAECggEARY9EsaCMLbS83wrhB37LWneFsHOTqhjHaypCaajvOp6C
-qwo4b/hFIqHm9WWSrGtc6ssNOtwAwphz14Fdhlybb6j6tX9dKeoHui+S6c4Ud/pY
-ReqDgPr1VR/OkqVwxS8X4dmJVCz5AHrdK+eRMUY5KCtOBfXRuixsdCVTiu+uNH99
-QC3kID1mmOF3B0chOK4WPN4cCsQpfOvoJfPBcJOtyxUSLlQdJH+04s3gVA24nCJj
-66+AnVkjgkyQ3q0Jugh1vo0ikrUW8uSLmg40sT5eYDN9jP6r5Gc8yDqsmYNVbLhU
-pY8XR4gtzbtAXK8R2ISKNhOSuTv4SWFXVZiDIBkuIQKBgQD3qnZYyhGzAiSM7T/R
-WS9KrQlzpRV5qSnEp2sPG/YF+SGAdgOaWOEUa3vbkCuLCTkoJhdTp67BZvv/657Q
-2eK2khsYRs02Oq+4rYvdcAv/wS2vkMbg6CUp1w2/pwBvwFTXegr00k6IabXNcXBy
-kAjMsZqVDSdQByrf80AlFyEsOQKBgQDvyoUDhLReeDNkbkPHL/EHD69Hgsc77Hm6
-MEiLdNljTJLRUl+DuD3yKX1xVBaCLp9fMJ/mCrxtkldhW+i6JBHRQ7vdf11zNsRf
-2Cud3Q97RMHTacCHhEQDGnYkOQNTRhk8L31N0XBKfUu0phSmVyTnu2lLWmYJ8hyO
-yOEB19JstQKBgQC3oVw+WRTmdSBEnWREBKxb4hCv/ib+Hb8qYDew7DpuE1oTtWzW
-dC/uxAMBuNOQMzZ93kBNdnbMT19pUXpfwC2o0IvmZBijrL+9Xm/lr7410zXchqvu
-9jEX5Kv8/gYE1cYSPhsBiy1PV5HE0edeCg18N/M1sJsFa0sO4X0eAxhFgQKBgQC7
-iQDkUooaBBn1ZsM9agIwSpUD8YTOGdDNy+tAnf9SSNXePXUT+CkCVm6UDnaYE8xy
-zv2PFUBu1W/fZdkqkwEYT8gCoBS/AcstRkw+Z2AvQQPxyxhXJBto7e4NwEUYgI9F
-4cI29SDEMR/fRbCKs0basVjVJPr+tkqdZP+MyHT6rQKBgQCT1YjY4F45Qn0Vl+sZ
-HqwVHvPMwVsexcRTdC0evaX/09s0xscSACvFJh5Dm9gnuMHElBcpZFATIvFcbV5Y
-MbJ/NNQiD63NEcL9VXwT96sMx2tnduOq4sYzu84kwPQ4ohxmPt/7xHU3L8SGqoec
-Bs6neR/sZuHzNm8y/xtxj2ZAEw==
------END PRIVATE KEY-----
-"""
-
 [global.authonly_request_keys.test]
 type = "RSA"
 key = """
@@ -332,26 +286,26 @@ TQIDAQAB
 tag = "irma"
 name = "Gebruik je IRMA app"
 image_path = "/static/irma.svg"
-start = "http://auth-irma:8000"
+start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
 image_path = "/static/digid.svg"
-start = "http://auth-test:8000"
+start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
 image_path = "/static/phone.svg"
-start = "http://comm-test:8000"
+start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
 image_path = "/static/chat.svg"
-start = "http://comm-matrix-bot:3000"
+start_url = "http://comm-matrix-bot:3000"
 
 
 [[global.purposes]]
@@ -379,63 +333,30 @@ server_url = "https://core.verderhelpen.nl"
 internal_url = "http://core:8000"
 internal_secret = "sample_secret_1234567890178901237890"
 
-[global.ui_signing_privkey]
-type = "RSA"
-key = """
------BEGIN PRIVATE KEY-----
-MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDn/BGtPZPgYa+5
-BhxaMuv+UV7nWxNXYUt3cYBoyIc3xD9VP9cSE/+RnrTjaXUGPZWlnbIzG/b3gkrA
-EIg1zfjxUth34N+QycnjJf0tkcrZaR7q0JYEH2ZiAaMzAI11dzNuX3rHX8d69pOi
-u+T3WvMK/PDq9XTyO2msDI3lpgxTgjT9xUnCLTduH+yStoAHXXSZBKqLVBT/bPoe
-S5/v7/H9sALG+JYLI8J3/CRc2kWFNxGV8V7IpzLSnAXHU4sIMnWpjuhT7PXBzKl4
-4d6JRLGuJIeVZpPbiR74nvwYZWacJl278xG66fmG+BqJbGeEgGYTEljq9G4yXCRt
-Go5+3lBNAgMBAAECggEARY9EsaCMLbS83wrhB37LWneFsHOTqhjHaypCaajvOp6C
-qwo4b/hFIqHm9WWSrGtc6ssNOtwAwphz14Fdhlybb6j6tX9dKeoHui+S6c4Ud/pY
-ReqDgPr1VR/OkqVwxS8X4dmJVCz5AHrdK+eRMUY5KCtOBfXRuixsdCVTiu+uNH99
-QC3kID1mmOF3B0chOK4WPN4cCsQpfOvoJfPBcJOtyxUSLlQdJH+04s3gVA24nCJj
-66+AnVkjgkyQ3q0Jugh1vo0ikrUW8uSLmg40sT5eYDN9jP6r5Gc8yDqsmYNVbLhU
-pY8XR4gtzbtAXK8R2ISKNhOSuTv4SWFXVZiDIBkuIQKBgQD3qnZYyhGzAiSM7T/R
-WS9KrQlzpRV5qSnEp2sPG/YF+SGAdgOaWOEUa3vbkCuLCTkoJhdTp67BZvv/657Q
-2eK2khsYRs02Oq+4rYvdcAv/wS2vkMbg6CUp1w2/pwBvwFTXegr00k6IabXNcXBy
-kAjMsZqVDSdQByrf80AlFyEsOQKBgQDvyoUDhLReeDNkbkPHL/EHD69Hgsc77Hm6
-MEiLdNljTJLRUl+DuD3yKX1xVBaCLp9fMJ/mCrxtkldhW+i6JBHRQ7vdf11zNsRf
-2Cud3Q97RMHTacCHhEQDGnYkOQNTRhk8L31N0XBKfUu0phSmVyTnu2lLWmYJ8hyO
-yOEB19JstQKBgQC3oVw+WRTmdSBEnWREBKxb4hCv/ib+Hb8qYDew7DpuE1oTtWzW
-dC/uxAMBuNOQMzZ93kBNdnbMT19pUXpfwC2o0IvmZBijrL+9Xm/lr7410zXchqvu
-9jEX5Kv8/gYE1cYSPhsBiy1PV5HE0edeCg18N/M1sJsFa0sO4X0eAxhFgQKBgQC7
-iQDkUooaBBn1ZsM9agIwSpUD8YTOGdDNy+tAnf9SSNXePXUT+CkCVm6UDnaYE8xy
-zv2PFUBu1W/fZdkqkwEYT8gCoBS/AcstRkw+Z2AvQQPxyxhXJBto7e4NwEUYgI9F
-4cI29SDEMR/fRbCKs0basVjVJPr+tkqdZP+MyHT6rQKBgQCT1YjY4F45Qn0Vl+sZ
-HqwVHvPMwVsexcRTdC0evaX/09s0xscSACvFJh5Dm9gnuMHElBcpZFATIvFcbV5Y
-MbJ/NNQiD63NEcL9VXwT96sMx2tnduOq4sYzu84kwPQ4ohxmPt/7xHU3L8SGqoec
-Bs6neR/sZuHzNm8y/xtxj2ZAEw==
------END PRIVATE KEY-----
-"""
-
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
 image_path = "/static/irma.svg"
-start = "http://auth-irma:8000"
+start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
 image_path = "/static/digid.svg"
-start = "http://auth-test:8000"
+start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
 image_path = "/static/phone.svg"
-start = "http://comm-test:8000"
+start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
 image_path = "/static/chat.svg"
-start = "http://comm-matrix-bot:3000"
+start_url = "http://comm-matrix-bot:3000"
 
 
 [[global.purposes]]
@@ -463,63 +384,30 @@ server_url = "https://core.verderhelpen.nl"
 internal_url = "http://core:8000"
 internal_secret = "sample_secret_1234567890178901237890"
 
-[global.ui_signing_privkey]
-type = "RSA"
-key = """
------BEGIN PRIVATE KEY-----
-MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDn/BGtPZPgYa+5
-BhxaMuv+UV7nWxNXYUt3cYBoyIc3xD9VP9cSE/+RnrTjaXUGPZWlnbIzG/b3gkrA
-EIg1zfjxUth34N+QycnjJf0tkcrZaR7q0JYEH2ZiAaMzAI11dzNuX3rHX8d69pOi
-u+T3WvMK/PDq9XTyO2msDI3lpgxTgjT9xUnCLTduH+yStoAHXXSZBKqLVBT/bPoe
-S5/v7/H9sALG+JYLI8J3/CRc2kWFNxGV8V7IpzLSnAXHU4sIMnWpjuhT7PXBzKl4
-4d6JRLGuJIeVZpPbiR74nvwYZWacJl278xG66fmG+BqJbGeEgGYTEljq9G4yXCRt
-Go5+3lBNAgMBAAECggEARY9EsaCMLbS83wrhB37LWneFsHOTqhjHaypCaajvOp6C
-qwo4b/hFIqHm9WWSrGtc6ssNOtwAwphz14Fdhlybb6j6tX9dKeoHui+S6c4Ud/pY
-ReqDgPr1VR/OkqVwxS8X4dmJVCz5AHrdK+eRMUY5KCtOBfXRuixsdCVTiu+uNH99
-QC3kID1mmOF3B0chOK4WPN4cCsQpfOvoJfPBcJOtyxUSLlQdJH+04s3gVA24nCJj
-66+AnVkjgkyQ3q0Jugh1vo0ikrUW8uSLmg40sT5eYDN9jP6r5Gc8yDqsmYNVbLhU
-pY8XR4gtzbtAXK8R2ISKNhOSuTv4SWFXVZiDIBkuIQKBgQD3qnZYyhGzAiSM7T/R
-WS9KrQlzpRV5qSnEp2sPG/YF+SGAdgOaWOEUa3vbkCuLCTkoJhdTp67BZvv/657Q
-2eK2khsYRs02Oq+4rYvdcAv/wS2vkMbg6CUp1w2/pwBvwFTXegr00k6IabXNcXBy
-kAjMsZqVDSdQByrf80AlFyEsOQKBgQDvyoUDhLReeDNkbkPHL/EHD69Hgsc77Hm6
-MEiLdNljTJLRUl+DuD3yKX1xVBaCLp9fMJ/mCrxtkldhW+i6JBHRQ7vdf11zNsRf
-2Cud3Q97RMHTacCHhEQDGnYkOQNTRhk8L31N0XBKfUu0phSmVyTnu2lLWmYJ8hyO
-yOEB19JstQKBgQC3oVw+WRTmdSBEnWREBKxb4hCv/ib+Hb8qYDew7DpuE1oTtWzW
-dC/uxAMBuNOQMzZ93kBNdnbMT19pUXpfwC2o0IvmZBijrL+9Xm/lr7410zXchqvu
-9jEX5Kv8/gYE1cYSPhsBiy1PV5HE0edeCg18N/M1sJsFa0sO4X0eAxhFgQKBgQC7
-iQDkUooaBBn1ZsM9agIwSpUD8YTOGdDNy+tAnf9SSNXePXUT+CkCVm6UDnaYE8xy
-zv2PFUBu1W/fZdkqkwEYT8gCoBS/AcstRkw+Z2AvQQPxyxhXJBto7e4NwEUYgI9F
-4cI29SDEMR/fRbCKs0basVjVJPr+tkqdZP+MyHT6rQKBgQCT1YjY4F45Qn0Vl+sZ
-HqwVHvPMwVsexcRTdC0evaX/09s0xscSACvFJh5Dm9gnuMHElBcpZFATIvFcbV5Y
-MbJ/NNQiD63NEcL9VXwT96sMx2tnduOq4sYzu84kwPQ4ohxmPt/7xHU3L8SGqoec
-Bs6neR/sZuHzNm8y/xtxj2ZAEw==
------END PRIVATE KEY-----
-"""
-
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
 image_path = "/static/irma.svg"
-start = "http://auth-irma:8000"
+start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
 image_path = "/static/digid.svg"
-start = "http://auth-test:8000"
+start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
 image_path = "/static/phone.svg"
-start = "http://comm-test:8000"
+start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
 image_path = "/static/chat.svg"
-start = "http://comm-matrix-bot:3000"
+start_url = "http://comm-matrix-bot:3000"
 
 
 [[global.purposes]]

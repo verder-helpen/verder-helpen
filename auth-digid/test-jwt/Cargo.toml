@@ -7,4 +7,6 @@ rust-version.workspace = true
 [dependencies]
 josekit.workspace = true
 
-verder-helpen-jwt.path = "../../verder-helpen-jwt"
+verder-helpen-common = { path = "../../verder-helpen-common", features = [
+    "jwt",
+] }

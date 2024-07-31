@@ -1,11 +1,6 @@
-use rocket::{
-    form::Form,
-    http::Status,
-    response::{Redirect, Responder},
-    serde::json::Json,
-    Request, Response, State,
-};
-use serde::{Deserialize, Serialize};
+use rocket::{form::Form, State};
+use serde::Deserialize;
+use verder_helpen_common::{ClientUrlResponse, StartRequestAuthOnly};
 
 use crate::{config::CoreConfig, error::Error, methods::Tag};
 
@@ -21,32 +16,6 @@ pub struct StartRequestCommOnly {
     purpose: String,
     auth_result: String,
     comm_method: Tag,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct StartRequestAuthOnly {
-    purpose: String,
-    auth_method: Tag,
-    comm_url: String,
-    attr_url: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ClientUrlResponse {
-    client_url: String,
-}
-
-impl<'r> Responder<'r, 'static> for ClientUrlResponse {
-    fn respond_to(self, req: &'r Request<'_>) -> Result<Response<'static>, Status> {
-        if req.headers().get_one("Accept") == Some("application/json") {
-            return Some(Json(ClientUrlResponse {
-                client_url: self.client_url,
-            }))
-            .respond_to(req);
-        }
-
-        Some(Redirect::to(self.client_url)).respond_to(req)
-    }
 }
 
 #[post("/start", format = "application/jwt", data = "<choices>")]
@@ -164,8 +133,7 @@ mod tests {
     };
     use serde_json::json;
     use verder_helpen_comm_common::jwt::sign_start_auth_request;
-    use verder_helpen_jwt::SignKeyConfig;
-    use verder_helpen_proto::StartRequestAuthOnly;
+    use verder_helpen_common::{SignKeyConfig, StartRequestAuthOnly};
 
     use crate::{setup_routes, start::ClientUrlResponse};
 
@@ -179,8 +147,8 @@ mod tests {
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -234,13 +202,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -263,7 +231,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -280,7 +248,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -297,7 +265,10 @@ allowed_comm = [ "test" ]
         assert_eq!(response.content_type(), Some(ContentType::JSON));
         let body =
             serde_json::from_slice::<ClientUrlResponse>(&response.into_bytes().unwrap()).unwrap();
-        assert_eq!(body.client_url, "https://example.com/client_url");
+        assert_eq!(
+            body.client_url,
+            "https://example.com/client_url".parse().unwrap()
+        );
     }
 
     #[test]
@@ -310,8 +281,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -365,13 +336,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -390,7 +361,7 @@ allowed_comm = [ "test" ]
             .post("/start")
             .header(ContentType::JSON)
             .header(Accept::JSON)
-            .body(r#"{"purpose":"test","auth_method":"test","comm_url":"https://example.com/continuation","attr_url":"https://example.com/attr_url"}"#);
+            .body(r#"{"purpose":"test","auth_method":"test","comm_url":"https://example.com/continuation_url","attr_url":"https://example.com/attr_url"}"#);
         let response = request.dispatch();
         assert_ne!(response.status(), rocket::http::Status::Ok);
     }
@@ -405,8 +376,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -460,13 +431,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -491,8 +462,8 @@ allowed_comm = [ "test" ]
             StartRequestAuthOnly {
                 purpose: "test".into(),
                 auth_method: "test".into(),
-                comm_url: "https://example.com/continuation".into(),
-                attr_url: Some("https://example.com/attr_url".into()),
+                comm_url: "https://example.com/continuation_url".parse().unwrap(),
+                attr_url: Some("https://example.com/attr_url".parse().unwrap()),
             },
             "test",
             signer.as_ref(),
@@ -518,8 +489,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -573,13 +544,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -602,7 +573,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -621,8 +592,8 @@ allowed_comm = [ "test" ]
             StartRequestAuthOnly {
                 purpose: "test".into(),
                 auth_method: "test".into(),
-                comm_url: "https://example.com/continuation".into(),
-                attr_url: Some("https://example.com/attr_url".into()),
+                comm_url: "https://example.com/continuation_url".parse().unwrap(),
+                attr_url: Some("https://example.com/attr_url".parse().unwrap()),
             },
             "test",
             signer.as_ref(),
@@ -640,7 +611,7 @@ allowed_comm = [ "test" ]
         assert_eq!(response.content_type(), Some(ContentType::JSON));
         let body =
             serde_json::from_slice::<ClientUrlResponse>(&response.into_bytes().unwrap()).unwrap();
-        assert_eq!(body.client_url, "https://example.com/client_url");
+        assert_eq!(body.client_url.as_str(), "https://example.com/client_url");
     }
 
     #[test]
@@ -653,8 +624,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -708,13 +679,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -736,7 +707,7 @@ allowed_comm = [ "test" ]
                     "attributes": [
                         "email",
                     ],
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -755,7 +726,7 @@ allowed_comm = [ "test" ]
             StartRequestAuthOnly {
                 purpose: "test".into(),
                 auth_method: "test".into(),
-                comm_url: "https://example.com/continuation".into(),
+                comm_url: "https://example.com/continuation_url".parse().unwrap(),
                 attr_url: None,
             },
             "test",
@@ -774,7 +745,7 @@ allowed_comm = [ "test" ]
         assert_eq!(response.content_type(), Some(ContentType::JSON));
         let body =
             serde_json::from_slice::<ClientUrlResponse>(&response.into_bytes().unwrap()).unwrap();
-        assert_eq!(body.client_url, "https://example.com/client_url");
+        assert_eq!(body.client_url.as_str(), "https://example.com/client_url");
     }
 
     #[test]
@@ -787,8 +758,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -842,13 +813,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -873,7 +844,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                 }));
         });
 
@@ -888,7 +859,10 @@ allowed_comm = [ "test" ]
         assert_eq!(response.content_type(), Some(ContentType::JSON));
         let body =
             serde_json::from_slice::<ClientUrlResponse>(&response.into_bytes().unwrap()).unwrap();
-        assert_eq!(body.client_url, "https://example.com/continuation");
+        assert_eq!(
+            body.client_url.as_str(),
+            "https://example.com/continuation_url"
+        );
     }
 
     #[test]
@@ -901,8 +875,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -956,13 +930,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -985,7 +959,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1002,7 +976,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -1027,8 +1001,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -1082,13 +1056,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -1111,7 +1085,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1128,7 +1102,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -1153,8 +1127,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -1208,13 +1182,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -1237,7 +1211,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1254,7 +1228,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -1279,8 +1253,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -1334,13 +1308,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -1363,7 +1337,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1380,7 +1354,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -1405,8 +1379,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -1460,13 +1434,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -1489,7 +1463,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1506,7 +1480,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -1531,8 +1505,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -1586,13 +1560,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -1615,7 +1589,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1632,7 +1606,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });
@@ -1657,8 +1631,8 @@ allowed_comm = [ "test" ]
                 Toml::string(&format!(
                     r#"
 [global]
-server_url = ""
-internal_url = ""
+server_url = "https://example.com"
+internal_url = "http://127.0.0.1"
 internal_secret = "sample_secret_1234567890178901237890"
 
 [global.ui_signing_privkey]
@@ -1712,13 +1686,13 @@ TQIDAQAB
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
 image_path = "none"
-start = "{}"
+start_url = "{}"
 
 [[global.purposes]]
 tag = "test"
@@ -1741,7 +1715,7 @@ allowed_comm = [ "test" ]
                         "email",
                     ],
                     "attr_url": "https://example.com/attr_url",
-                    "continuation": "https://example.com/continuation",
+                    "continuation_url": "https://example.com/continuation_url",
                 }));
             then.status(200)
                 .header("Content-Type", "application/json")
@@ -1758,7 +1732,7 @@ allowed_comm = [ "test" ]
             then.status(200)
                 .header("Content-Type", "application/json")
                 .json_body(json!({
-                    "client_url": "https://example.com/continuation",
+                    "client_url": "https://example.com/continuation_url",
                     "attr_url": "https://example.com/attr_url",
                 }));
         });

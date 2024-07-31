@@ -29,7 +29,7 @@ import (
 
 type StartRequest struct {
 	Attributes   []string `json:"attributes"`
-	Continuation string   `json:"continuation"`
+	ContinuationURL string   `json:"continuation_url"`
 	AttributeURL *string  `json:"attr_url"`
 }
 
@@ -94,7 +94,7 @@ func (c *Configuration) startSession(w http.ResponseWriter, r *http.Request) {
 		log.Error(err)
 		return
 	}
-	session, err := c.SessionManager.NewSession(string(encodedAttributes), request.Continuation, request.AttributeURL)
+	session, err := c.SessionManager.NewSession(string(encodedAttributes), request.ContinuationURL, request.AttributeURL)
 	if err != nil {
 		w.WriteHeader(500)
 		log.Error(err)
@@ -314,9 +314,9 @@ func (c *Configuration) doConfirm(w http.ResponseWriter, r *http.Request) {
 				log.Errorf("attribute url failed (%d)\n", response.StatusCode)
 			}
 		}
-		http.Redirect(w, r, session.continuation, 302)
+		http.Redirect(w, r, session.continuation_url, 302)
 	} else {
-		redirectURL, err := url.Parse(session.continuation)
+		redirectURL, err := url.Parse(session.continuation_url)
 		if err != nil {
 			w.WriteHeader(500)
 			log.Error(err)
@@ -360,7 +360,7 @@ func (c *Configuration) doLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get continuation URL before actually logging out
-	redirectURL, err := url.Parse(session.continuation)
+	redirectURL, err := url.Parse(session.continuation_url)
 	if err != nil {
 		w.WriteHeader(500)
 		log.Error(err)

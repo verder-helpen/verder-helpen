@@ -34,6 +34,8 @@ pub enum Error {
     Parse(#[from] strum::ParseError),
     #[error("Template Error: {0}")]
     Template(#[from] tera::Error),
+    #[error("Url Parse Error: {0}")]
+    Url(#[from] url::ParseError),
 }
 
 impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for Error {
@@ -70,8 +72,8 @@ impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for Error {
     }
 }
 
-impl From<verder_helpen_jwt::Error> for Error {
-    fn from(e: verder_helpen_jwt::Error) -> Self {
+impl From<verder_helpen_common::Error> for Error {
+    fn from(e: verder_helpen_common::Error) -> Self {
         Error::Jwe(JwtError::Jwe(e))
     }
 }

@@ -14,5 +14,4 @@ serde.workspace = true
 serde_json.workspace = true
 serde_yaml.workspace = true
 
-verder-helpen-jwt.path = "../verder-helpen-jwt"
-verder-helpen-proto.path = "../verder-helpen-proto"
+verder-helpen-common.path = "../verder-helpen-common"

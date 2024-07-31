@@ -22,7 +22,7 @@ pub fn collect_credentials(
 
     for guest_auth_result in guest_auth_results {
         let attributes = if let Some(result) = &guest_auth_result.auth_result {
-            verder_helpen_jwt::dangerous_decrypt_auth_result_without_verifying_expiration(
+            verder_helpen_common::dangerous_decrypt_auth_result_without_verifying_expiration(
                 result,
                 config.verifier(),
                 config.decrypter(),
@@ -145,8 +145,9 @@ mod tests {
         jwe::{JweDecrypter, JweEncrypter},
         jws::{alg::hmac::HmacJwsAlgorithm, JwsSigner, JwsVerifier},
     };
-    use verder_helpen_jwt::{sign_and_encrypt_auth_result, EncryptionKeyConfig, SignKeyConfig};
-    use verder_helpen_proto::{AuthResult, AuthStatus};
+    use verder_helpen_common::{
+        sign_and_encrypt_auth_result, AuthResult, AuthStatus, EncryptionKeyConfig, SignKeyConfig,
+    };
 
     use super::*;
     use crate::config::AuthDuringCommConfig;
@@ -221,8 +222,8 @@ mod tests {
         }];
 
         let auth_during_comm = AuthDuringCommConfig {
-            core_url: "https://example.com".to_string(),
-            widget_url: "https://example.com".to_string(),
+            core_url: "https://example.com".parse().unwrap(),
+            widget_url: "https://example.com".parse().unwrap(),
             display_name: "comm-common".to_string(),
             widget_signer,
             start_auth_signer,
@@ -232,7 +233,7 @@ mod tests {
         };
 
         let config: Config = Config {
-            internal_url: "https://example.com".to_string(),
+            internal_url: "https://example.com".parse().unwrap(),
             external_host_url: None,
             external_guest_url: None,
             default_locale: String::from("nl"),

@@ -6,7 +6,7 @@ use josekit::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::error::Error;
+use crate::jwt::error::Error;
 
 // Configuration management
 //

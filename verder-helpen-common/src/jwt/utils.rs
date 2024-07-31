@@ -5,9 +5,12 @@ use josekit::{
     jws::{JwsHeader, JwsSigner, JwsVerifier},
     jwt::{self, JwtPayload, JwtPayloadValidator},
 };
-use verder_helpen_proto::{AuthResult, AuthStatus};
+use url::Url;
 
-use crate::error::Error;
+use crate::{
+    jwt::error::Error,
+    types::authresult::{AuthResult, AuthStatus},
+};
 
 // Jwe manipulation
 //
@@ -78,7 +81,7 @@ fn raw_decrypt_and_verify_auth_result(
     };
     let session_url = decoded_jws.claim("session_url");
     let session_url = match session_url {
-        Some(session_url) => Some(serde_json::from_value::<String>(session_url.clone())?),
+        Some(session_url) => Some(serde_json::from_value::<Url>(session_url.clone())?),
         None => None,
     };
 

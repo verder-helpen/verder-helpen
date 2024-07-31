@@ -4,7 +4,7 @@ use josekit::{
 };
 use thiserror::Error;
 #[cfg(feature = "auth_during_comm")]
-use verder_helpen_proto::StartRequestAuthOnly;
+use verder_helpen_common::StartRequestAuthOnly;
 
 use crate::types::AuthSelectParams;
 
@@ -17,7 +17,7 @@ pub enum JwtError {
     #[error("JWT error: {0}")]
     Jwt(#[from] josekit::JoseError),
     #[error("Verder Helpen JWE error: {0}")]
-    Jwe(#[from] verder_helpen_jwt::Error),
+    Jwe(#[from] verder_helpen_common::Error),
 }
 
 #[cfg(feature = "auth_during_comm")]
@@ -77,8 +77,7 @@ mod tests {
         jws::{JwsSigner, JwsVerifier},
         jwt::JwtPayloadValidator,
     };
-    use verder_helpen_jwt::SignKeyConfig;
-    use verder_helpen_proto::StartRequestAuthOnly;
+    use verder_helpen_common::{SignKeyConfig, StartRequestAuthOnly};
 
     use super::{sign_auth_select_params, sign_start_auth_request};
     use crate::types::AuthSelectParams;
@@ -136,7 +135,7 @@ mod tests {
             StartRequestAuthOnly {
                 purpose: "test".into(),
                 auth_method: "someauth".into(),
-                comm_url: "https://example.com".into(),
+                comm_url: "https://example.com".parse().unwrap(),
                 attr_url: None,
             },
             "some",
@@ -156,7 +155,7 @@ mod tests {
         .unwrap();
         assert_eq!(req.purpose, "test");
         assert_eq!(req.auth_method, "someauth");
-        assert_eq!(req.comm_url, "https://example.com");
+        assert_eq!(req.comm_url, "https://example.com".parse().unwrap());
         assert_eq!(req.attr_url, None);
     }
 
@@ -174,8 +173,8 @@ mod tests {
         let result = sign_auth_select_params(
             &AuthSelectParams {
                 purpose: "test".into(),
-                start_url: "https://example.com".into(),
-                cancel_url: "https://example.com/cancel".into(),
+                start_url: "https://example.com".parse().unwrap(),
+                cancel_url: "https://example.com/cancel".parse().unwrap(),
                 display_name: "bla".into(),
             },
             signer.as_ref(),
@@ -186,7 +185,7 @@ mod tests {
         assert_eq!(payload.claim("purpose").unwrap().as_str().unwrap(), "test");
         assert_eq!(
             payload.claim("start_url").unwrap().as_str().unwrap(),
-            "https://example.com"
+            "https://example.com/"
         );
         assert_eq!(
             payload.claim("cancel_url").unwrap().as_str().unwrap(),

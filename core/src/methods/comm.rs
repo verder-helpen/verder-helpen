@@ -1,21 +1,17 @@
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
 
 use serde::Deserialize;
-use verder_helpen_proto::{StartCommRequest, StartCommResponse};
+use verder_helpen_common::{StartCommRequest, StartCommResponse};
 
 use super::{Method, Tag};
-
-fn default_as_false() -> bool {
-    false
-}
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct CommunicationMethod {
     tag: Tag,
     name: String,
-    image_path: String,
-    start: String,
-    #[serde(default = "default_as_false")]
+    image_path: PathBuf,
+    start_url: String,
+    #[serde(default = "bool::default")]
     disable_attributes_at_start: bool,
 }
 
@@ -28,7 +24,7 @@ impl Method for CommunicationMethod {
         &self.name
     }
 
-    fn image_path(&self) -> &str {
+    fn image_path(&self) -> &PathBuf {
         &self.image_path
     }
 }
@@ -41,7 +37,7 @@ impl CommunicationMethod {
             .build()?;
 
         client
-            .post(&format!("{}/start_communication", &self.start))
+            .post(&format!("{}/start_communication", &self.start_url))
             .json(&StartCommRequest {
                 purpose: purpose.to_string(),
                 auth_result: None,
@@ -66,7 +62,7 @@ impl CommunicationMethod {
                 .build()?;
 
             client
-                .post(&attr_url)
+                .post(attr_url)
                 .header("Content-Type", "application/jwt")
                 .body(auth_result.to_string())
                 .send()
@@ -77,12 +73,12 @@ impl CommunicationMethod {
                 attr_url: None,
             })
         } else {
+            let mut client_url = comm_data.client_url;
+            client_url
+                .query_pairs_mut()
+                .append_pair("result", auth_result);
             Ok(StartCommResponse {
-                client_url: if comm_data.client_url.contains('?') {
-                    format!("{}&result={}", comm_data.client_url, auth_result)
-                } else {
-                    format!("{}?result={}", comm_data.client_url, auth_result)
-                },
+                client_url,
                 attr_url: None,
             })
         }
@@ -106,7 +102,7 @@ impl CommunicationMethod {
             .build()?;
 
         client
-            .post(&format!("{}/start_communication", &self.start))
+            .post(&format!("{}/start_communication", &self.start_url))
             .json(&StartCommRequest {
                 purpose: purpose.to_string(),
                 auth_result: Some(auth_result.to_string()),
@@ -144,7 +140,7 @@ mod tests {
             tag: "test".into(),
             name: "test".into(),
             image_path: "none".into(),
-            start: server.base_url(),
+            start_url: server.base_url().parse().unwrap(),
             disable_attributes_at_start: false,
         };
 
@@ -152,7 +148,10 @@ mod tests {
 
         start_mock.assert();
         let result = result.unwrap();
-        assert_eq!(result.client_url, "https://example.com/client_url");
+        assert_eq!(
+            result.client_url,
+            "https://example.com/client_url".parse().unwrap()
+        );
         assert_eq!(result.attr_url, None);
     }
 
@@ -177,7 +176,7 @@ mod tests {
             tag: "test".into(),
             name: "test".into(),
             image_path: "none".into(),
-            start: server.base_url(),
+            start_url: server.base_url().parse().unwrap(),
             disable_attributes_at_start: false,
         };
 
@@ -185,8 +184,14 @@ mod tests {
 
         start_mock.assert();
         let result = result.unwrap();
-        assert_eq!(result.client_url, "https://example.com/client_url");
-        assert_eq!(result.attr_url, Some("https://example.com/attr_url".into()));
+        assert_eq!(
+            result.client_url,
+            "https://example.com/client_url".parse().unwrap()
+        );
+        assert_eq!(
+            result.attr_url,
+            Some("https://example.com/attr_url".parse().unwrap())
+        );
     }
 
     #[test]
@@ -210,7 +215,7 @@ mod tests {
             tag: "test".into(),
             name: "test".into(),
             image_path: "none".into(),
-            start: server.base_url(),
+            start_url: server.base_url(),
             disable_attributes_at_start: false,
         };
 
@@ -218,7 +223,10 @@ mod tests {
 
         start_mock.assert();
         let result = result.unwrap();
-        assert_eq!(result.client_url, "https://example.com/client_url");
+        assert_eq!(
+            result.client_url,
+            "https://example.com/client_url".parse().unwrap()
+        );
         assert_eq!(result.attr_url, None);
     }
 
@@ -250,7 +258,7 @@ mod tests {
             tag: "test".into(),
             name: "test".into(),
             image_path: "none".into(),
-            start: server.base_url(),
+            start_url: server.base_url(),
             disable_attributes_at_start: true,
         };
 
@@ -259,7 +267,10 @@ mod tests {
         start_mock.assert();
         auth_mock.assert();
         let result = result.unwrap();
-        assert_eq!(result.client_url, "https://example.com/client_url");
+        assert_eq!(
+            result.client_url,
+            "https://example.com/client_url".parse().unwrap()
+        );
         assert_eq!(result.attr_url, None);
     }
 
@@ -283,7 +294,7 @@ mod tests {
             tag: "test".into(),
             name: "test".into(),
             image_path: "none".into(),
-            start: server.base_url(),
+            start_url: server.base_url(),
             disable_attributes_at_start: true,
         };
 
@@ -294,6 +305,8 @@ mod tests {
         assert_eq!(
             result.client_url,
             "https://example.com/client_url?result=test"
+                .parse()
+                .unwrap()
         );
         assert_eq!(result.attr_url, None);
     }

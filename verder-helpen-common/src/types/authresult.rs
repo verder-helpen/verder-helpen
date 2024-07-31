@@ -2,16 +2,16 @@ use std::collections::HashMap;
 
 use rocket::form::FromFormField;
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 /// Result status of authentication flow
 #[derive(Debug, Serialize, Deserialize, PartialEq, Eq, Clone)]
+#[serde(rename_all = "lowercase")]
 pub enum AuthStatus {
     /// Authentication flow completed successfully, resulting in attributes
-    #[serde(rename = "success")]
     Success,
     /// Authentication flow completed unsuccessfully, no attributes were
     /// obtained
-    #[serde(rename = "failed")]
     Failed,
 }
 
@@ -26,7 +26,7 @@ pub struct AuthResult {
     /// URL on which the authentication plugin wants to be kept updated on
     /// session status
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub session_url: Option<String>,
+    pub session_url: Option<Url>,
 }
 
 /// Session activity status update type

@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use chrono::{DateTime, Utc};
+use reqwest::Url;
 use rocket::tokio;
 use rocket_sync_db_pools::{database, postgres};
 use serde::{Deserialize, Serialize};
@@ -54,7 +55,7 @@ impl Session {
                     &[
                         &this.guest_token.id,
                         &this.guest_token.room_id,
-                        &this.guest_token.redirect_url,
+                        &this.guest_token.redirect_url.to_string(),
                         &this.guest_token.purpose,
                         &this.guest_token.name,
                         &this.attr_id,
@@ -114,7 +115,7 @@ impl Session {
                         &new_attr_id,
                         &token.id,
                         &token.room_id,
-                        &token.redirect_url,
+                        &token.redirect_url.to_string(),
                         &token.purpose,
                         &token.name,
                     ],
@@ -179,7 +180,7 @@ impl Session {
                         let guest_token = GuestToken {
                             id: r.get("session_id"),
                             room_id: r.get("room_id"),
-                            redirect_url: r.get("redirect_url"),
+                            redirect_url: r.get::<&str, String>("redirect_url").parse::<Url>()?,
                             name: r.get("name"),
                             purpose: r.get("purpose"),
                         };
@@ -276,7 +277,7 @@ session = {{ url = "{}" }}
         let guest_token = GuestToken {
             purpose: "test".to_owned(),
             id: id.unwrap_or_else(|| random_string(32)),
-            redirect_url: "verderhelpen.nl".to_owned(),
+            redirect_url: "https://verderhelpen.nl".parse().unwrap(),
             name: "Test Verder Helpen".to_owned(),
             room_id: room_id.unwrap_or_else(|| random_string(32)),
         };
@@ -311,7 +312,7 @@ session = {{ url = "{}" }}
                 &[
                     &s.guest_token.id,
                     &s.guest_token.room_id,
-                    &s.guest_token.redirect_url,
+                    &s.guest_token.redirect_url.to_string(),
                     &s.guest_token.purpose,
                     &s.guest_token.name,
                     &s.attr_id,
