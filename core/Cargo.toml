@@ -12,8 +12,7 @@ rocket = { workspace = true, features = ["json"] }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 
-verder-helpen-jwt.path = "../verder-helpen-jwt"
-verder-helpen-proto.path = "../verder-helpen-proto"
+verder-helpen-common.path = "../verder-helpen-common"
 
 [dev-dependencies]
 figment = { workspace = true, features = ["env", "toml", "json"] }

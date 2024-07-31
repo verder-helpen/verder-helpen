@@ -2,14 +2,14 @@ use std::{collections::HashMap, error::Error as StdError, fmt::Display};
 
 use josekit::{jwe::JweEncrypter, jws::JwsSigner};
 use serde::Deserialize;
-use verder_helpen_jwt::{EncryptionKeyConfig, SignKeyConfig};
+use verder_helpen_common::{BaseUrl, EncryptionKeyConfig, SignKeyConfig};
 
 #[derive(Debug)]
 pub enum Error {
     UnknownAttribute(String),
     Yaml(serde_yaml::Error),
     Json(serde_json::Error),
-    Jwt(verder_helpen_jwt::Error),
+    Jwt(verder_helpen_common::Error),
 }
 
 impl From<serde_yaml::Error> for Error {
@@ -24,8 +24,8 @@ impl From<serde_json::Error> for Error {
     }
 }
 
-impl From<verder_helpen_jwt::Error> for Error {
-    fn from(e: verder_helpen_jwt::Error) -> Error {
+impl From<verder_helpen_common::Error> for Error {
+    fn from(e: verder_helpen_common::Error) -> Error {
         Error::Jwt(e)
     }
 }
@@ -54,8 +54,8 @@ impl StdError for Error {
 
 #[derive(Deserialize, Debug)]
 struct RawConfig {
-    server_url: String,
-    internal_url: String,
+    server_url: BaseUrl,
+    internal_url: BaseUrl,
     attributes: HashMap<String, String>,
     #[serde(default = "bool::default")]
     with_session: bool,
@@ -66,8 +66,8 @@ struct RawConfig {
 #[derive(Debug, Deserialize)]
 #[serde(try_from = "RawConfig")]
 pub struct Config {
-    server_url: String,
-    internal_url: String,
+    server_url: BaseUrl,
+    internal_url: BaseUrl,
     attributes: HashMap<String, String>,
     with_session: bool,
     encrypter: Box<dyn JweEncrypter>,
@@ -116,11 +116,11 @@ impl Config {
         Ok(result)
     }
 
-    pub fn server_url(&self) -> &str {
+    pub fn server_url(&self) -> &BaseUrl {
         &self.server_url
     }
 
-    pub fn internal_url(&self) -> &str {
+    pub fn internal_url(&self) -> &BaseUrl {
         &self.internal_url
     }
 

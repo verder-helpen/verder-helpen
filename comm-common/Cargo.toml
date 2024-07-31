@@ -29,9 +29,9 @@ strum_macros.workspace = true
 tera.workspace = true
 thiserror.workspace = true
 unic-langid.workspace = true
+url.workspace = true
 
-verder-helpen-jwt.path = "../verder-helpen-jwt"
-verder-helpen-proto.path = "../verder-helpen-proto"
+verder-helpen-common.path = "../verder-helpen-common"
 
 [dev-dependencies]
 figment = { workspace = true, features = ["env", "toml", "json"] }

@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 /// Data provided for a start_communication request
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -15,9 +16,9 @@ pub struct StartCommRequest {
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct StartCommResponse {
     /// URL for client to start communication process
-    pub client_url: String,
+    pub client_url: Url,
     /// URL to which authentication result will/should be sent after completion
     /// of authentication flow
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub attr_url: Option<String>,
+    pub attr_url: Option<Url>,
 }

@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use url::Url;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct StartRequest {
@@ -16,9 +17,9 @@ pub struct AuthSelectParams {
     /// The session purpose
     pub purpose: String,
     /// The start url to redirect the user to on authentication success
-    pub start_url: String,
+    pub start_url: Url,
     /// The url to redirect the user to on cancel of the login
-    pub cancel_url: String,
+    pub cancel_url: Url,
     /// The communication method's display name
     pub display_name: String,
 }
@@ -47,6 +48,7 @@ pub mod platform_token {
     use core::str;
 
     use josekit::{jws::JwsVerifier, jwt::JwtPayloadValidator};
+    use reqwest::Url;
     use serde::{de::DeserializeOwned, Deserialize, Serialize};
 
     use crate::jwt::JwtError;
@@ -61,7 +63,7 @@ pub mod platform_token {
     pub struct GuestToken {
         pub id: String,
         #[serde(rename = "redirectUrl")]
-        pub redirect_url: String,
+        pub redirect_url: Url,
         pub name: String,
         #[serde(rename = "roomId")]
         pub room_id: String,
@@ -107,13 +109,13 @@ mod tests {
                             eyJleHAiOjE2NTQzNTY1MTgsImlhdCI6MTYzM\
                             jM4Njk1MywicGF5bG9hZCI6eyJkb21haW4iOi\
                             JndWVzdCIsImlkIjoiMTAxLTEwMTAtMTAxMC0\
-                            xMDEiLCJpbnN0YW5jZSI6InR3ZWVkZWdvbGYu\
-                            bmwiLCJuYW1lIjoiVW5rbm93biIsInB1cnBvc\
-                            2UiOiJ0ZXN0IiwicmVkaXJlY3RVcmwiOiJodH\
-                            RwczovL3R3ZWVkZWdvbGYubmwiLCJyb29tSWQ\
-                            iOiIxNiJ9LCJyZWMiOiJJZENvbnRhY3RDb21t\
-                            dW5pY2F0aW9uIn0.s-mRc0sOXao-R6pMG15en\
-                            Xidwh5PdnK_XwFZkpgS-wo";
+                            xMDEiLCJpbnN0YW5jZSI6InZlcmRlcmhlbHBl\
+                            bi5ubCIsIm5hbWUiOiJVbmtub3duIiwicHVyc\
+                            G9zZSI6InRlc3QiLCJyZWRpcmVjdFVybCI6Im\
+                            h0dHBzOi8vdmVyZGVyaGVscGVuLm5sIiwicm9\
+                            vbUlkIjoiMTYifSwicmVjIjoiSWRDb250YWN0\
+                            Q29tbXVuaWNhdGlvbiJ9.Trwf944cIlq7gENh\
+                            MtQbPfO0ojChAt1Q-fPFHes-ZfM";
 
     const HOST_TOKEN: &str = "\
                             eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.\
@@ -122,8 +124,8 @@ mod tests {
                             J1c2VyIiwiaWQiOiIxIiwiaW5zdGFuY2UiOiJ\
                             0d2VlZGVnb2xmLm5sIiwicm9vbUlkIjoiMTYi\
                             fSwicmVjIjoiSWRDb250YWN0Q29tbXVuaWNhd\
-                            GlvbiJ9.s2qV6zwaH09ktbAxU-YiL-Y5u-AD8R\
-                            LiNWrnap7jhJk";
+                            GlvbiJ9.s2qV6zwaH09ktbAxU-YiL-Y5u-AD8\
+                            RLiNWrnap7jhJk";
 
     #[test]
     #[cfg(feature = "platform_token")]
@@ -151,7 +153,7 @@ mod tests {
         .expect("Error verifying guest token");
 
         assert_eq!(id, "101-1010-1010-101");
-        assert_eq!(redirect_url, "https://tweedegolf.nl");
+        assert_eq!(redirect_url, "https://verderhelpen.nl".parse().unwrap());
         assert_eq!(name, "Unknown");
         assert_eq!(room_id, "16");
 

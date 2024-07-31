@@ -5,7 +5,7 @@ CREATE TABLE "verderhelpen_session" (
   "id" SERIAL NOT NULL,
   "sessionid" text NOT NULL,
   "attributes" text NOT NULL,
-  "continuation" text NOT NULL,
+  "continuation_url" text NOT NULL,
   "attr_url" text,
   "expiry" timestamp,
   PRIMARY KEY("id")

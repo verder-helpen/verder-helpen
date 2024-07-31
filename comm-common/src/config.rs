@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, path::PathBuf};
 
 use josekit::{jwe::JweDecrypter, jws::JwsVerifier};
 use serde::Deserialize;
-use verder_helpen_jwt::{EncryptionKeyConfig, SignKeyConfig};
+use verder_helpen_common::{BaseUrl, EncryptionKeyConfig, SignKeyConfig};
 
 #[cfg(feature = "auth_during_comm")]
 pub(crate) use self::auth_during_comm::{AuthDuringCommConfig, RawAuthDuringCommConfig};
@@ -14,10 +14,10 @@ pub type LanguageTranslations = HashMap<String, HashMap<String, String>>;
 #[derive(Deserialize, Debug)]
 pub struct RawConfig {
     /// Internal-facing URL
-    internal_url: String,
+    internal_url: BaseUrl,
     /// External-facing URLs. Defaults to Internal-facing if not set
-    external_guest_url: Option<String>,
-    external_host_url: Option<String>,
+    external_guest_url: Option<BaseUrl>,
+    external_host_url: Option<BaseUrl>,
     /// Default locale
     default_locale: String,
     /// Translations indexed by locale
@@ -35,16 +35,16 @@ pub struct RawConfig {
     /// Configuration specific for auth during comm
     auth_during_comm: RawAuthDuringCommConfig,
 
-    custom_css: Option<String>,
+    custom_css: Option<PathBuf>,
 }
 
 /// configuration container for a typical verder-helpen communication plugin
 #[derive(Debug, Deserialize)]
 #[serde(try_from = "RawConfig")]
 pub struct Config {
-    pub internal_url: String,
-    pub external_guest_url: Option<String>,
-    pub external_host_url: Option<String>,
+    pub internal_url: BaseUrl,
+    pub external_guest_url: Option<BaseUrl>,
+    pub external_host_url: Option<BaseUrl>,
     pub default_locale: String,
     pub translations: LanguageTranslations,
 
@@ -57,7 +57,7 @@ pub struct Config {
     #[serde(flatten)]
     pub auth_during_comm: AuthDuringCommConfig,
 
-    pub custom_css: Option<String>,
+    pub custom_css: Option<PathBuf>,
 }
 
 // This tryfrom can be removed once try_from for fields lands in serde
@@ -98,18 +98,18 @@ impl Config {
         self.verifier.as_ref()
     }
 
-    pub fn internal_url(&self) -> &str {
+    pub fn internal_url(&self) -> &BaseUrl {
         &self.internal_url
     }
 
-    pub fn external_guest_url(&self) -> &str {
+    pub fn external_guest_url(&self) -> &BaseUrl {
         match &self.external_guest_url {
             Some(external_guest_url) => external_guest_url,
             None => &self.internal_url,
         }
     }
 
-    pub fn external_host_url(&self) -> &str {
+    pub fn external_host_url(&self) -> &BaseUrl {
         match &self.external_host_url {
             Some(external_host_url) => external_host_url,
             None => &self.internal_url,
@@ -136,7 +136,7 @@ mod auth_during_comm {
 
     use josekit::jws::{alg::hmac::HmacJwsAlgorithm, JwsSigner, JwsVerifier};
     use serde::Deserialize;
-    use verder_helpen_jwt::SignKeyConfig;
+    use verder_helpen_common::{BaseUrl, SignKeyConfig};
 
     use crate::error::Error;
 
@@ -160,9 +160,9 @@ mod auth_during_comm {
     /// Configuration specific for auth during comm
     pub struct RawAuthDuringCommConfig {
         /// URL to reach the Verder Helpen core directly
-        core_url: String,
+        core_url: BaseUrl,
         /// URL to allow user redirects to the widget
-        widget_url: String,
+        widget_url: BaseUrl,
         /// Display name for this plugin, to be presented to user
         display_name: String,
         /// Private key to sign widget parameters
@@ -180,8 +180,8 @@ mod auth_during_comm {
     #[derive(Debug, Deserialize)]
     #[serde(try_from = "RawAuthDuringCommConfig")]
     pub struct AuthDuringCommConfig {
-        pub(crate) core_url: String,
-        pub(crate) widget_url: String,
+        pub(crate) core_url: BaseUrl,
+        pub(crate) widget_url: BaseUrl,
         pub(crate) display_name: String,
         pub(crate) widget_signer: Box<dyn JwsSigner>,
         pub(crate) start_auth_signer: Box<dyn JwsSigner>,
@@ -219,11 +219,11 @@ mod auth_during_comm {
     }
 
     impl AuthDuringCommConfig {
-        pub fn core_url(&self) -> &str {
+        pub fn core_url(&self) -> &BaseUrl {
             &self.core_url
         }
 
-        pub fn widget_url(&self) -> &str {
+        pub fn widget_url(&self) -> &BaseUrl {
             &self.widget_url
         }
 
@@ -357,21 +357,24 @@ MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZLquEijJ7cP7K9qIHG7EvCTph53N
     fn test_valid_config() {
         let config: Config = config_from_str(TEST_CONFIG_VALID);
 
-        assert_eq!(config.internal_url(), "https://internal.example.com");
         assert_eq!(
-            config.external_guest_url(),
+            config.internal_url().as_ref().as_str(),
+            "https://internal.example.com/"
+        );
+        assert_eq!(
+            config.external_guest_url().as_ref().as_str(),
             "https://external.example.com/guest"
         );
         assert_eq!(
-            config.external_host_url(),
+            config.external_host_url().as_ref().as_str(),
             "https://external.example.com/host"
         );
 
         #[cfg(feature = "auth_during_comm")]
         {
             assert_eq!(
-                config.auth_during_comm().core_url(),
-                "https://core.example.com"
+                config.auth_during_comm().core_url().as_ref().as_str(),
+                "https://core.example.com/"
             );
             assert_eq!(config.auth_during_comm().display_name(), "Example Comm");
 

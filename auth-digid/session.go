@@ -214,13 +214,13 @@ type VerderHelpenSessionManager struct {
 type VerderHelpenSession struct {
 	id           string
 	attributes   string
-	continuation string
+	continuationURL string
 	attributeURL *string
 }
 
-func (m *VerderHelpenSessionManager) NewSession(attributes, continuation string, attributeURL *string) (*VerderHelpenSession, error) {
+func (m *VerderHelpenSessionManager) NewSession(attributes, continuationURL string, attributeURL *string) (*VerderHelpenSession, error) {
 	id := GenerateID()
-	_, err := m.db.Exec("INSERT INTO verderhelpen_session (sessionid, attributes, continuation, attr_url, expiry) VALUES ($1, $2, $3, $4, NOW() + ($5 * Interval '1 minute'))", id, attributes, continuation, attributeURL, m.timeout)
+	_, err := m.db.Exec("INSERT INTO verderhelpen_session (sessionid, attributes, continuation_url, attr_url, expiry) VALUES ($1, $2, $3, $4, NOW() + ($5 * Interval '1 minute'))", id, attributes, continuation, attributeURL, m.timeout)
 	if err != nil {
 		return nil, err
 	}
@@ -228,13 +228,13 @@ func (m *VerderHelpenSessionManager) NewSession(attributes, continuation string,
 	return &VerderHelpenSession{
 		id:           id,
 		attributes:   attributes,
-		continuation: continuation,
+		continuationURL: continuationURL,
 		attributeURL: attributeURL,
 	}, nil
 }
 
 func (m *VerderHelpenSessionManager) GetSession(id string) (*VerderHelpenSession, error) {
-	rows, err := m.db.Query("SELECT attributes, continuation, attr_url FROM verderhelpen_session WHERE sessionid = $1 AND expiry > NOW()", id)
+	rows, err := m.db.Query("SELECT attributes, continuation_url, attr_url FROM verderhelpen_session WHERE sessionid = $1 AND expiry > NOW()", id)
 	if err != nil {
 		return nil, err
 	}
@@ -244,9 +244,9 @@ func (m *VerderHelpenSessionManager) GetSession(id string) (*VerderHelpenSession
 		return nil, errors.New("No Session")
 	}
 	var attributes string
-	var continuation string
+	var continuationURL string
 	var attributeURL *string
-	err = rows.Scan(&attributes, &continuation, &attributeURL)
+	err = rows.Scan(&attributes, &continuationURL, &attributeURL)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +254,7 @@ func (m *VerderHelpenSessionManager) GetSession(id string) (*VerderHelpenSession
 	return &VerderHelpenSession{
 		id:           id,
 		attributes:   attributes,
-		continuation: continuation,
+		continuationURL: continuationURL,
 		attributeURL: attributeURL,
 	}, nil
 }

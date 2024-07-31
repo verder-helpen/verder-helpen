@@ -375,7 +375,7 @@ func TestIDCSessions(t *testing.T) {
 	session1, err := SessionManager.NewSession("a", "b", nil)
 	require.NoError(t, err)
 	assert.Equal(t, "a", session1.attributes)
-	assert.Equal(t, "b", session1.continuation)
+	assert.Equal(t, "b", session1.continuationURL)
 	assert.Equal(t, (*string)(nil), session1.attributeURL)
 
 	session2string := "f"
@@ -383,7 +383,7 @@ func TestIDCSessions(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotEqual(t, session1.id, session2.id)
 	assert.Equal(t, "d", session2.attributes)
-	assert.Equal(t, "e", session2.continuation)
+	assert.Equal(t, "e", session2.continuationURL)
 	assert.Equal(t, "f", *session2.attributeURL)
 
 	session3, err := SessionManager.GetSession(session1.id)
@@ -411,7 +411,7 @@ func TestIDCSessionTimeout(t *testing.T) {
 	session1, err := SessionManager.NewSession("a", "b", nil)
 	require.NoError(t, err)
 	assert.Equal(t, "a", session1.attributes)
-	assert.Equal(t, "b", session1.continuation)
+	assert.Equal(t, "b", session1.continuationURL)
 	assert.Equal(t, (*string)(nil), session1.attributeURL)
 
 	session2, err := SessionManager.GetSession(session1.id)
@@ -494,7 +494,7 @@ func TestSamlSessionVerderHelpenMapping(t *testing.T) {
 	session1, err := SessionManager.NewSession("a", "b", nil)
 	require.NoError(t, err)
 	assert.Equal(t, "a", session1.attributes)
-	assert.Equal(t, "b", session1.continuation)
+	assert.Equal(t, "b", session1.continuationURL)
 	assert.Equal(t, (*string)(nil), session1.attributeURL)
 
 	err = SamlSessionManager.SetVerderHelpenSession(testSession1t, session1.id, "testjwt")

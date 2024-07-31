@@ -25,7 +25,7 @@ use session::{Session, SessionDBConn};
 use templates::{RenderType, RenderedContent};
 use translations::Translations;
 use types::{AuthSelectParams, FromPlatformJwt, GuestToken, HostToken, StartRequest};
-use verder_helpen_proto::{ClientUrlResponse, StartRequestAuthOnly};
+use verder_helpen_common::{ClientUrlResponse, StartRequestAuthOnly};
 
 mod auth;
 mod config;
@@ -54,7 +54,9 @@ fn init(guest_token: &str, config: &State<Config>) -> Result<Redirect, Error> {
 
     let auth_select_params = AuthSelectParams {
         purpose,
-        start_url: format!("{}/start/{}", config.external_guest_url(), guest_token),
+        start_url: config
+            .external_guest_url()
+            .join(&format!("start/{guest_token}")),
         cancel_url: redirect_url,
         display_name: config.auth_during_comm().display_name().to_owned(),
     };
@@ -95,7 +97,9 @@ async fn start(
 
     let attr_id = util::random_string(64);
     let comm_url = guest_token.redirect_url.clone();
-    let attr_url = format!("{}/auth_result/{}", config.internal_url(), attr_id);
+    let attr_url = config
+        .internal_url()
+        .join(&format!("auth_result/{attr_id}"));
     let purpose = guest_token.purpose.clone();
     if !Session::restart_auth(guest_token.clone(), attr_id.clone(), &db).await? {
         let session = Session::new(guest_token, attr_id.clone());
@@ -118,7 +122,7 @@ async fn start(
 
     let client = reqwest::Client::new();
     let client_url_response = client
-        .post(format!("{}/start", config.auth_during_comm().core_url()))
+        .post(config.auth_during_comm().core_url().join("start"))
         .header(
             reqwest::header::ACCEPT,
             reqwest::header::HeaderValue::from_static("application/json"),
@@ -152,7 +156,7 @@ async fn auth_result(
     db: SessionDBConn,
     queue: &State<Sender<AttributesUpdateEvent>>,
 ) -> Result<(), Error> {
-    verder_helpen_jwt::decrypt_and_verify_auth_result(
+    verder_helpen_common::decrypt_and_verify_auth_result(
         auth_result,
         config.verifier(),
         config.decrypter(),

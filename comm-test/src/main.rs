@@ -1,8 +1,7 @@
 use std::{error::Error as StdError, fmt::Display};
 
 use rocket::{get, launch, post, routes, serde::json::Json, State};
-use verder_helpen_jwt::decrypt_and_verify_auth_result;
-use verder_helpen_proto::{StartCommRequest, StartCommResponse};
+use verder_helpen_common::{decrypt_and_verify_auth_result, StartCommRequest, StartCommResponse};
 
 mod config;
 
@@ -13,7 +12,7 @@ enum Error {
     Config(config::Error),
     Json(serde_json::Error),
     Utf(std::str::Utf8Error),
-    Jwt(verder_helpen_jwt::Error),
+    Jwt(verder_helpen_common::Error),
 }
 
 impl<'r, 'o: 'r> rocket::response::Responder<'r, 'o> for Error {
@@ -41,8 +40,8 @@ impl From<std::str::Utf8Error> for Error {
     }
 }
 
-impl From<verder_helpen_jwt::Error> for Error {
-    fn from(e: verder_helpen_jwt::Error) -> Error {
+impl From<verder_helpen_common::Error> for Error {
+    fn from(e: verder_helpen_common::Error) -> Error {
         Error::Jwt(e)
     }
 }
@@ -109,12 +108,12 @@ fn start(
 
     if config.use_attr_url() && request.auth_result.is_none() {
         Ok(Json(StartCommResponse {
-            client_url: format!("{}/ui", config.server_url()),
-            attr_url: Some(format!("{}/auth_result", config.internal_url())),
+            client_url: config.server_url().join("ui"),
+            attr_url: Some(config.internal_url().join("auth_result")),
         }))
     } else {
         Ok(Json(StartCommResponse {
-            client_url: format!("{}/ui", config.server_url()),
+            client_url: config.server_url().join("ui"),
             attr_url: None,
         }))
     }
