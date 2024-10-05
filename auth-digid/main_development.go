@@ -97,8 +97,8 @@ func (c *Configuration) getConfirm(w http.ResponseWriter, r *http.Request) {
 	sessionid := chi.URLParam(r, "sessionid")
 
 	attributes := map[string]string{
-		"fullname": "Henk de Vries",
-		"city":     "Nijmegen",
+		"naam": "Henk de Vries",
+		"stad": "Nijmegen",
 	}
 
 	lang := c.Bundle.ParseAcceptLanguage(r.Header.Get("Accept-Language"))
@@ -123,8 +123,8 @@ func (c *Configuration) getConfirm(w http.ResponseWriter, r *http.Request) {
 func (c *Configuration) doConfirm(w http.ResponseWriter, r *http.Request) {
 	sessionid := chi.URLParam(r, "sessionid")
 	attributes := map[string]string{
-		"fullname": "Henk de Vries",
-		"city":     "Nijmegen",
+		"naam": "Henk de Vries",
+		"stad": "Nijmegen",
 	}
 
 	session, err := c.SessionManager.GetSession(sessionid)

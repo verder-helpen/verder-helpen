@@ -1,13 +1,13 @@
 {
-  "attributes": {
-    "city": "City",
-    "fullname": "Name"
-  },
-  "messages": {
-    "confirm": "Confirm",
-    "logout": "Logout",
-    "confirm_title": "Confirm details",
-    "confirm_intro": "The following details will be shown to the service center",
-    "secured_by": "secured by"
-  }
+    "attributes": {
+        "stad": "City",
+        "naam": "Name"
+    },
+    "messages": {
+        "confirm": "Confirm",
+        "logout": "Logout",
+        "confirm_title": "Confirm details",
+        "confirm_intro": "The following details will be shown to the service center",
+        "secured_by": "secured by"
+    }
 }
