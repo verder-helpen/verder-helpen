@@ -201,13 +201,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -335,13 +333,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -430,13 +426,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -543,13 +537,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -678,13 +670,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -812,13 +802,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -929,13 +917,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -1055,13 +1041,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -1181,13 +1165,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -1307,13 +1289,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -1433,13 +1413,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -1559,13 +1537,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
@@ -1685,13 +1661,11 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]

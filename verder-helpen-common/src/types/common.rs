@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use rocket::{
     http::Status,
     response::{Redirect, Responder},
@@ -15,7 +13,6 @@ pub type Tag = String;
 pub struct MethodProperties {
     pub tag: Tag,
     pub name: String,
-    pub image_path: PathBuf,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

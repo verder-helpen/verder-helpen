@@ -285,26 +285,22 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
-image_path = "/static/irma.svg"
 start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
-image_path = "/static/digid.svg"
 start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
-image_path = "/static/phone.svg"
 start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
-image_path = "/static/chat.svg"
 start_url = "http://comm-matrix-bot:3000"
 
 
@@ -336,26 +332,22 @@ internal_secret = "sample_secret_1234567890178901237890"
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
-image_path = "/static/irma.svg"
 start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
-image_path = "/static/digid.svg"
 start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
-image_path = "/static/phone.svg"
 start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
-image_path = "/static/chat.svg"
 start_url = "http://comm-matrix-bot:3000"
 
 
@@ -387,26 +379,22 @@ internal_secret = "sample_secret_1234567890178901237890"
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
-image_path = "/static/irma.svg"
 start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
-image_path = "/static/digid.svg"
 start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
-image_path = "/static/phone.svg"
 start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
-image_path = "/static/chat.svg"
 start_url = "http://comm-matrix-bot:3000"
 
 

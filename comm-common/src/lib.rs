@@ -21,8 +21,6 @@ pub mod util;
 // credential collection and rendering
 #[cfg(feature = "platform_token")]
 pub mod credentials;
-#[macro_use]
-extern crate lazy_static;
 
 pub mod prelude {
     #[cfg(feature = "session_db")]

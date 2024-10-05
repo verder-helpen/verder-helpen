@@ -28,9 +28,9 @@ import (
 )
 
 type StartRequest struct {
-	Attributes   []string `json:"attributes"`
+	Attributes      []string `json:"attributes"`
 	ContinuationURL string   `json:"continuation_url"`
-	AttributeURL *string  `json:"attr_url"`
+	AttributeURL    *string  `json:"attr_url"`
 }
 
 type StartResponse struct {
@@ -314,9 +314,9 @@ func (c *Configuration) doConfirm(w http.ResponseWriter, r *http.Request) {
 				log.Errorf("attribute url failed (%d)\n", response.StatusCode)
 			}
 		}
-		http.Redirect(w, r, session.continuation_url, 302)
+		http.Redirect(w, r, session.continuationURL, 302)
 	} else {
-		redirectURL, err := url.Parse(session.continuation_url)
+		redirectURL, err := url.Parse(session.continuationURL)
 		if err != nil {
 			w.WriteHeader(500)
 			log.Error(err)
@@ -360,7 +360,7 @@ func (c *Configuration) doLogout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get continuation URL before actually logging out
-	redirectURL, err := url.Parse(session.continuation_url)
+	redirectURL, err := url.Parse(session.continuationURL)
 	if err != nil {
 		w.WriteHeader(500)
 		log.Error(err)

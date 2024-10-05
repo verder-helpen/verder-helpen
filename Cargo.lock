@@ -2558,7 +2558,7 @@ dependencies = [
 [[package]]
 name = "rocket_oauth2"
 version = "0.5.0"
-source = "git+https://github.com/arjentz/rocket_oauth2.git?rev=44d596d4f219816b287f525b1bc8260cb0229262#44d596d4f219816b287f525b1bc8260cb0229262"
+source = "git+https://github.com/atezet/rocket_oauth2.git?rev=44d596d4f219816b287f525b1bc8260cb0229262#44d596d4f219816b287f525b1bc8260cb0229262"
 dependencies = [
  "async-trait",
  "base64 0.21.7",
@@ -3676,7 +3676,6 @@ dependencies = [
  "chrono",
  "figment",
  "josekit",
- "lazy_static",
  "postgres",
  "rand",
  "reqwest",

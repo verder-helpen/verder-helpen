@@ -1,4 +1,4 @@
-use std::{path::PathBuf, time::Duration};
+use std::time::Duration;
 
 use serde::Deserialize;
 use verder_helpen_common::{StartCommRequest, StartCommResponse};
@@ -9,7 +9,6 @@ use super::{Method, Tag};
 pub struct CommunicationMethod {
     tag: Tag,
     name: String,
-    image_path: PathBuf,
     start_url: String,
     #[serde(default = "bool::default")]
     disable_attributes_at_start: bool,
@@ -22,10 +21,6 @@ impl Method for CommunicationMethod {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn image_path(&self) -> &PathBuf {
-        &self.image_path
     }
 }
 
@@ -139,7 +134,6 @@ mod tests {
         let method = super::CommunicationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url().parse().unwrap(),
             disable_attributes_at_start: false,
         };
@@ -175,7 +169,6 @@ mod tests {
         let method = super::CommunicationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url().parse().unwrap(),
             disable_attributes_at_start: false,
         };
@@ -214,7 +207,6 @@ mod tests {
         let method = super::CommunicationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url(),
             disable_attributes_at_start: false,
         };
@@ -257,7 +249,6 @@ mod tests {
         let method = super::CommunicationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url(),
             disable_attributes_at_start: true,
         };
@@ -293,7 +284,6 @@ mod tests {
         let method = super::CommunicationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url(),
             disable_attributes_at_start: true,
         };

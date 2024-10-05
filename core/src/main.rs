@@ -17,10 +17,9 @@ use start::{session_start, session_start_form, session_start_jwt};
 fn boot() -> _ {
     let base = setup_routes(rocket::build());
 
-    let _ = base.figment().extract::<CoreConfig>().unwrap_or_else(|_| {
-        // Ignore error value, as it could contain private keys
-        log::error!("Failure to parse configuration");
-        panic!("Failure to parse configuration")
+    let _ = base.figment().extract::<CoreConfig>().unwrap_or_else(|e| {
+        log::error!("Failure to parse configuration: {e:?}");
+        panic!("Failure to parse configuration: {e:?}")
     });
 
     base

@@ -13,7 +13,6 @@ use crate::{
 struct MethodProperties {
     tag: Tag,
     name: String,
-    image_path: String,
 }
 
 impl MethodProperties {
@@ -28,7 +27,6 @@ impl MethodProperties {
             Ok(MethodProperties {
                 tag: String::from(method.tag()),
                 name: String::from(method.name()),
-                image_path: String::from(method.image_path().to_str().unwrap_or("")),
             })
         })
         .collect()
@@ -157,26 +155,22 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
-image_path = "/static/irma.svg"
 start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
-image_path = "/static/digid.svg"
 start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
-image_path = "/static/phone.svg"
 start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
-image_path = "/static/chat.svg"
 start_url = "http://comm-matrix-bot:3000"
 
 

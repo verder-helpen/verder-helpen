@@ -1,11 +1,5 @@
-#[macro_use]
-extern crate lazy_static;
-
 use std::convert::Infallible;
 
-use auth::Authorized;
-use config::Config;
-use error::Error;
 use rocket::{
     get, post,
     response::{
@@ -21,22 +15,19 @@ use rocket::{
     },
     Shutdown, State,
 };
-use session::{Session, SessionDBConn};
-use templates::{RenderType, RenderedContent};
-use translations::Translations;
-use types::{AuthSelectParams, FromPlatformJwt, GuestToken, HostToken, StartRequest};
+use verder_helpen_comm_common::{
+    auth::{self, Authorized},
+    config::Config,
+    credentials,
+    error::Error,
+    jwt,
+    session::{self, Session, SessionDBConn},
+    templates::{RenderType, RenderedContent},
+    translations::Translations,
+    types::{AuthSelectParams, FromPlatformJwt, GuestToken, HostToken, StartRequest},
+    util,
+};
 use verder_helpen_common::{ClientUrlResponse, StartRequestAuthOnly};
-
-mod auth;
-mod config;
-mod credentials;
-mod error;
-mod jwt;
-mod session;
-mod templates;
-mod translations;
-mod types;
-mod util;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -276,12 +267,12 @@ async fn attribute_ui(
 
 #[get("/attribute.css")]
 fn attribute_css() -> RawCss<&'static str> {
-    RawCss(include_str!("templates/attribute.css"))
+    RawCss(include_str!("../templates/attribute.css"))
 }
 
 #[get("/attribute.js")]
 fn attribute_js() -> RawJavaScript<&'static str> {
-    RawJavaScript(include_str!("templates/attribute.js"))
+    RawJavaScript(include_str!("../templates/attribute.js"))
 }
 
 #[rocket::main]
@@ -296,10 +287,10 @@ async fn main() -> Result<(), rocket::Error> {
         )
         .attach(SessionDBConn::fairing());
 
-    let config = base.figment().extract::<Config>().unwrap_or_else(|_| {
-        // Drop error value, as it could contain secrets
-        panic!("Failure to parse configuration")
-    });
+    let config = base
+        .figment()
+        .extract::<Config>()
+        .unwrap_or_else(|e| panic!("Failure to parse configuration: {e:?}"));
 
     // attach Auth provider fairing
     if let Some(auth_provider) = config.auth_provider() {

@@ -53,32 +53,27 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "irma"
 name = "IRMA"
-image_path = "/static/irma.svg"
-start = "http://auth-irma:8000"
+start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "DigiD"
-image_path = "/static/digid.svg"
-start = "http://auth-test:8000"
+start_url = "http://auth-test:8000"
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
-image_path = "/static/phone.svg"
-start = "http://comm-amazon-connect:8000"
+start_url = "http://comm-amazon-connect:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
-image_path = "/static/chat.svg"
-start = "http://comm-matrix-bot:3000"
+start_url = "http://comm-matrix-bot:3000"
 
 [[global.comm_methods]]
 tag = "test"
 name = "Test"
-image_path = "/static/video.svg"
-start = "http://comm-test:8000"
+start_url = "http://comm-test:8000"
 
 [[global.purposes]]
 tag = "report_move"

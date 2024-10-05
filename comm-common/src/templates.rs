@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{path::Path, sync::LazyLock};
 
 use rocket::{
     response::{self, content, Responder},
@@ -70,21 +70,19 @@ macro_rules! include_template {
     };
 }
 
-lazy_static! {
-    pub static ref TEMPLATES: Tera = {
-        let mut tera = Tera::default();
+pub static TEMPLATES: LazyLock<Tera> = LazyLock::new(|| {
+    let mut tera = Tera::default();
 
-        tera.register_tester("some", is_some);
+    tera.register_tester("some", is_some);
 
-        include_template!(tera, "macros.html");
-        include_template!(tera, "attribute.js");
-        include_template!(tera, "base.html");
-        include_template!(tera, "credentials.html");
-        include_template!(tera, "login.html");
-        include_template!(tera, "logout_form.html");
-        include_template!(tera, "none_in_room.html");
-        include_template!(tera, "footer.html");
+    include_template!(tera, "macros.html");
+    include_template!(tera, "attribute.js");
+    include_template!(tera, "base.html");
+    include_template!(tera, "credentials.html");
+    include_template!(tera, "login.html");
+    include_template!(tera, "logout_form.html");
+    include_template!(tera, "none_in_room.html");
+    include_template!(tera, "footer.html");
 
-        tera
-    };
-}
+    tera
+});

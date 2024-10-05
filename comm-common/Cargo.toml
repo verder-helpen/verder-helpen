@@ -4,6 +4,14 @@ version = "0.1.0"
 edition.workspace = true
 rust-version.workspace = true
 
+[[bin]]
+name = "verder-helpen-comm-isolate"
+path = "src/bin/isolate.rs"
+
+[[bin]]
+name = "verder-helpen-comm-pass"
+path = "src/bin/pass.rs"
+
 [features]
 default = ["auth_during_comm", "platform_token", "session_db"]
 auth_during_comm = ["platform_token"]
@@ -14,7 +22,6 @@ session_db = ["platform_token"]
 accept-language.workspace = true
 chrono = { workspace = true, features = ["serde"] }
 josekit.workspace = true
-lazy_static.workspace = true
 postgres = { workspace = true, features = ["with-chrono-0_4"] }
 rand.workspace = true
 reqwest = { workspace = true, features = ["json"] }

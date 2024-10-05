@@ -212,24 +212,24 @@ type VerderHelpenSessionManager struct {
 }
 
 type VerderHelpenSession struct {
-	id           string
-	attributes   string
+	id              string
+	attributes      string
 	continuationURL string
-	attributeURL *string
+	attributeURL    *string
 }
 
 func (m *VerderHelpenSessionManager) NewSession(attributes, continuationURL string, attributeURL *string) (*VerderHelpenSession, error) {
 	id := GenerateID()
-	_, err := m.db.Exec("INSERT INTO verderhelpen_session (sessionid, attributes, continuation_url, attr_url, expiry) VALUES ($1, $2, $3, $4, NOW() + ($5 * Interval '1 minute'))", id, attributes, continuation, attributeURL, m.timeout)
+	_, err := m.db.Exec("INSERT INTO verderhelpen_session (sessionid, attributes, continuation_url, attr_url, expiry) VALUES ($1, $2, $3, $4, NOW() + ($5 * Interval '1 minute'))", id, attributes, continuationURL, attributeURL, m.timeout)
 	if err != nil {
 		return nil, err
 	}
 
 	return &VerderHelpenSession{
-		id:           id,
-		attributes:   attributes,
+		id:              id,
+		attributes:      attributes,
 		continuationURL: continuationURL,
-		attributeURL: attributeURL,
+		attributeURL:    attributeURL,
 	}, nil
 }
 
@@ -252,10 +252,10 @@ func (m *VerderHelpenSessionManager) GetSession(id string) (*VerderHelpenSession
 	}
 
 	return &VerderHelpenSession{
-		id:           id,
-		attributes:   attributes,
+		id:              id,
+		attributes:      attributes,
 		continuationURL: continuationURL,
-		attributeURL: attributeURL,
+		attributeURL:    attributeURL,
 	}, nil
 }
 

@@ -13,7 +13,7 @@ resolver = "2"
 
 [workspace.package]
 edition = "2021"
-rust-version = "1.76"
+rust-version = "1.80"
 
 [workspace.dependencies]
 accept-language = "3.1.0"
@@ -23,7 +23,6 @@ chrono = "0.4.38"
 figment = "0.10.19"
 httpmock = "0.7.0"
 josekit = "0.8.7"
-lazy_static = "1.5.0"
 log = "0.4.22"
 nutype = "0.4.3"
 postgres = "0.19.8"
@@ -46,4 +45,4 @@ unic-langid = "0.9.5"
 url = "2.5.2"
 
 [patch.crates-io]
-rocket_oauth2 = { git = "https://github.com/arjentz/rocket_oauth2.git", rev = "44d596d4f219816b287f525b1bc8260cb0229262" }
+rocket_oauth2 = { git = "https://github.com/atezet/rocket_oauth2.git", rev = "44d596d4f219816b287f525b1bc8260cb0229262" }

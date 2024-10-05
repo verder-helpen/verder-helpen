@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf, time::Duration};
+use std::{collections::HashMap, time::Duration};
 
 use reqwest::Url;
 use rocket::{response::Redirect, State};
@@ -12,7 +12,6 @@ use crate::{config::CoreConfig, error::Error};
 pub struct AuthenticationMethod {
     tag: Tag,
     name: String,
-    image_path: PathBuf,
     start_url: BaseUrl,
     #[serde(default = "bool::default")]
     disable_attr_url: bool,
@@ -98,10 +97,6 @@ impl Method for AuthenticationMethod {
 
     fn name(&self) -> &str {
         &self.name
-    }
-
-    fn image_path(&self) -> &PathBuf {
-        &self.image_path
     }
 }
 
@@ -198,26 +193,22 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "irma"
 name = "Gebruik je IRMA app"
-image_path = "/static/irma.svg"
 start_url = "http://auth-irma:8000"
 
 [[global.auth_methods]]
 tag = "digid"
 name = "Gebruik DigiD"
-image_path = "/static/digid.svg"
 start_url = "http://auth-test:8000"
 
 
 [[global.comm_methods]]
 tag = "call"
 name = "Bellen"
-image_path = "/static/phone.svg"
 start_url = "http://comm-test:8000"
 
 [[global.comm_methods]]
 tag = "chat"
 name = "Chatten"
-image_path = "/static/chat.svg"
 start_url = "http://comm-matrix-bot:3000"
 
 
@@ -270,7 +261,6 @@ allowed_comm = [ "call" ]
         let method = super::AuthenticationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url().parse().unwrap(),
             disable_attr_url: false,
         };
@@ -314,7 +304,6 @@ allowed_comm = [ "call" ]
         let method = super::AuthenticationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url().parse().unwrap(),
             disable_attr_url: false,
         };
@@ -367,7 +356,6 @@ allowed_comm = [ "call" ]
         let method = super::AuthenticationMethod {
             tag: "test".into(),
             name: "test".into(),
-            image_path: "none".into(),
             start_url: server.base_url().parse().unwrap(),
             disable_attr_url: true,
         };
@@ -448,14 +436,12 @@ TQIDAQAB
 [[global.auth_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 disable_attr_url = true
 start_url = "{}"
 
 [[global.comm_methods]]
 tag = "test"
 name = "test"
-image_path = "none"
 start_url = "{}"
 
 [[global.purposes]]
