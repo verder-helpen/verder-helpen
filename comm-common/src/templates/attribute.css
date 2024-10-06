@@ -2,7 +2,7 @@
   --primary-color: 33, 0, 112;
   --background-color: #fafbfb;
   --container-max-width: 48rem;
-  --logo: url('/assets/verderhelpen.svg');
+  --logo: url("/assets/logos/verderhelpen.svg");
   --light-grey: #ebedef;
   --grey: #dde0e4;
   --dark-grey: #a9a9a9;
@@ -11,7 +11,9 @@
 }
 
 /* remove button style  */
-button, input[type="submit"], input[type="reset"] {
+button,
+input[type="submit"],
+input[type="reset"] {
   background: none;
   color: inherit;
   border: none;
@@ -25,7 +27,8 @@ button, input[type="submit"], input[type="reset"] {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 16;
   line-height: 1.5;
@@ -102,12 +105,12 @@ a {
 }
 
 .credential dl dd div > .icon {
-  content: ' ';
+  content: " ";
   display: inline-block;
   width: 1.4rem;
   height: 1.4rem;
-  margin-right: .4rem;
-  background-image: url('/assets/check-fill.svg');
+  margin-right: 0.4rem;
+  background-image: url("/assets/icons/check-fill.svg");
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
@@ -186,11 +189,11 @@ a {
 }
 
 .button.login > .icon {
-  background-image: url('/assets/digid.svg');
+  background-image: url("/assets/digid.svg");
 }
 
 .button.logout > .icon {
-  background-image: url('/assets/digid.svg');
+  background-image: url("/assets/digid.svg");
 }
 
 .button.primary > .text {
